@@ -1,0 +1,4 @@
+APPNAME=growgue
+BUILDTYPE=Debug
+OSTARGET=Linux
+CURSES=pdcurses
