@@ -1,0 +1,6 @@
+<actor>
+    <display color="selected" char="o"/>
+    <stats hp="25"/>
+    <aggro radius="10"/>
+    <script id="data/test.lua"/>
+</actor>

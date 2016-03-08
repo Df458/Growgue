@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "actor.h"
 #include "color.h"
 #include "input.h"
 #include "log.h"
@@ -21,6 +22,7 @@ enum game_state_type
 };
 
 static int game_state = STATE_MENU;
+map* test_map;
 
 void init_game()
 {
@@ -36,10 +38,14 @@ void init_game()
     WINDOW* hp_win = newwin(1, 90, 24, 0);
     WINDOW* log_win = newwin(10, 90, 25, 0);
 
-    init_player(map_win, stats_win, hp_win);
     init_log(log_win);
     init_map(map_win);
-    draw_map(0, 0);
+    test_map = create_map(80, 24);
+    init_player(map_win, stats_win, hp_win, test_map);
+    actor* test = create_actor("data/test.actor");
+    init_actor(test);
+    kill_actor(test);
+    draw_map(0, 0, test_map);
     /* add_message(COLOR_HP_CRIT, "CRITICAL LOREM IPSUM REACHED! EVACTUATE IMMEDIATELY!"); */
     if(ask_question(COLOR_DEFAULT, "Say hi?"))
         add_message(COLOR_HP_LOW, "HELLO!");
@@ -54,10 +60,11 @@ bool update_game()
     else if(in == INPUT_ACTION && (get_last_action() == ACTION_SCROLL_UP || get_last_action() == ACTION_SCROLL_DOWN)) {
         log_scroll(get_last_action() == ACTION_SCROLL_UP);
         draw_log();
-    } else
-        update_map(1);
+    } else {
         update_player();
+        update_map(1, test_map);
         draw_log();
+    }
     return true;
 }
 

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "color.h"
+#include "input.h"
 #include "player.h"
 
 WINDOW* map_win = 0;
@@ -9,11 +10,16 @@ WINDOW* hp_win = 0;
 
 #define BAR_LENGTH 43
 
-int hp_max = 0;
-int ep_max = 0;
+static int hp_max = 0;
+static int ep_max = 0;
 
-int hp_current;
-int ep_current;
+static int hp_current;
+static int ep_current;
+
+static int x = 0;
+static int y = 0;
+
+static map* current_map = 0;
 
 void init_stats()
 {
@@ -24,18 +30,18 @@ void init_stats()
     ep_current = ep_max;
 }
 
-void init_player(WINDOW* map, WINDOW* stats, WINDOW* hp)
+void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, map* start_map)
 {
-    map_win = map;
+    map_win = mapw;
     stats_win = stats;
     hp_win = hp;
 
     init_stats();
 
-    draw_player();
+    current_map = start_map;
 }
 
-void draw_player()
+void draw_player(int x, int y)
 {
     if(hp_current > 0) {
         float ratio = (float)hp_current / (float)hp_max;
@@ -83,6 +89,8 @@ void draw_player()
     mvwprintw(stats_win, 0, 0, "HP: %-5d", hp_max);
     mvwprintw(stats_win, 1, 0, "EP: %-5d", ep_max);
 
+    mvwaddch(map_win, x, y, '@');
+
     wrefresh(map_win);
     wrefresh(stats_win);
     wrefresh(hp_win);
@@ -90,7 +98,11 @@ void draw_player()
 
 void update_player()
 {
-    draw_player();
+    switch(get_last_input()) {
+        case INPUT_DIRECTIONAL:
+            player_move(get_last_direction());
+            break;
+    }
 }
 
 void cleanup_player()
@@ -98,4 +110,50 @@ void cleanup_player()
    delwin(map_win);
    delwin(stats_win);
    delwin(hp_win);
+}
+
+void player_get_position(int* px, int* py)
+{
+    *px = x;
+    *py = y;
+}
+
+void player_move(int direction)
+{
+    int dx = 0;
+    int dy = 0;
+    switch(direction) {
+        case DIRECTION_NORTH:
+            dy = -1;
+            break;
+        case DIRECTION_SOUTH:
+            dy = 1;
+            break;
+        case DIRECTION_EAST:
+            dx = 1;
+            break;
+        case DIRECTION_WEST:
+            dx = -1;
+            break;
+        case DIRECTION_NORTHEAST:
+            dx = 1;
+            dy = -1;
+            break;
+        case DIRECTION_NORTHWEST:
+            dx = -1;
+            dy = -1;
+            break;
+        case DIRECTION_SOUTHEAST:
+            dx = 1;
+            dy = 1;
+            break;
+        case DIRECTION_SOUTHWEST:
+            dx = -1;
+            dy = 1;
+            break;
+    }
+    if(can_move(x + dx, y + dy, current_map)) {
+        x += dx;
+        y += dy;
+    }
 }

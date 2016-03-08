@@ -36,21 +36,25 @@ int get_input()
             last_input_type = INPUT_DIRECTIONAL;
             break;
 
+        case 'y':
         case '7':
             last_input_direction = DIRECTION_NORTHWEST;
             last_input_type = INPUT_DIRECTIONAL;
             break;
 
+        case 'u':
         case '9':
             last_input_direction = DIRECTION_NORTHEAST;
             last_input_type = INPUT_DIRECTIONAL;
             break;
 
+        case 'b':
         case '1':
             last_input_direction = DIRECTION_SOUTHWEST;
             last_input_type = INPUT_DIRECTIONAL;
             break;
 
+        case 'n':
         case '3':
             last_input_direction = DIRECTION_SOUTHEAST;
             last_input_type = INPUT_DIRECTIONAL;

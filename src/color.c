@@ -1,7 +1,24 @@
 #include <curses.h>
+#include <string.h>
 #include "color.h"
 
 int pairs[COLOR_COUNT] = { 0 };
+const char* pair_names[] =
+{
+    "default",
+
+    "selected",
+
+    "hp good",
+    "EP good",
+    "HP low",
+    "EP low",
+    "HP critical",
+    "EP critical",
+
+    "warning",
+    "error",
+};
 
 enum low_pair_ids {
     WHITE_BLACK = 0,
@@ -49,4 +66,12 @@ void set_hicolor(bool hi)
 void set_color(WINDOW* win, int id)
 {
     wcolor_set(win, pairs[id], 0);
+}
+
+int color_str(const char* str)
+{
+    for(int i = 0; i < COLOR_COUNT; ++i)
+        if(!strcmp(str, pair_names[i]))
+            return i;
+    return 0;
 }
