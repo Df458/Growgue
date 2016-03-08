@@ -46,9 +46,6 @@ void init_game()
     init_actor(test);
     kill_actor(test);
     draw_map(0, 0, test_map);
-    /* add_message(COLOR_HP_CRIT, "CRITICAL LOREM IPSUM REACHED! EVACTUATE IMMEDIATELY!"); */
-    if(ask_question(COLOR_DEFAULT, "Say hi?"))
-        add_message(COLOR_HP_LOW, "HELLO!");
     draw_log();
 }
 

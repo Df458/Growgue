@@ -1,4 +1,8 @@
-function onCreate()
-    game.log("default", "TEST LUA MESSAGE :D");
-    print("Tes!");
+function create()
+    game.log("warning", "TEST LUA MESSAGE :D");
+    if game.ask("default", "Say hello?") == true then
+        game.log("default", "Hi!");
+    else
+        game.log("warning", "You aren't a nice person");
+    end
 end

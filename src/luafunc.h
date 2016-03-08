@@ -5,10 +5,12 @@
 #include <lauxlib.h>
 
 int lua_log_message(lua_State* state);
+int lua_ask_question(lua_State* state);
 
 static const luaL_Reg global_funcs[] =
 {
     {"log", lua_log_message},
+    {"ask", lua_ask_question},
     {0, 0}
 };
 

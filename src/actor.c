@@ -1,6 +1,7 @@
 #include "actor.h"
 #include "color.h"
 #include "loader.h"
+#include "log.h"
 #include "luafunc.h"
 
 actor* create_actor(const char* file)
@@ -21,7 +22,6 @@ actor* create_actor(const char* file)
     lua_newtable(act->script_state);
     luaL_setfuncs(act->script_state, global_funcs, 0);
     lua_setglobal(act->script_state, "game");
-    lua_pop(act->script_state, 1);
 
     xmlChar* a = 0;
     for(xmlNodePtr node = root->children; node; node = node->next) {
@@ -55,8 +55,14 @@ actor* create_actor(const char* file)
         if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"script")) {
             if((a = xmlGetProp(node, (const xmlChar*)"id"))) {
                 char* path = create_path((char*)a);
-                luaL_loadfile(act->script_state, path);
-                lua_pcall(act->script_state, 0, 0, 0);
+                if(luaL_loadfile(act->script_state, path)) {
+                    add_message(COLOR_WARNING, "Failed to prepare script");
+                }
+                if(lua_isfunction(act->script_state, -1) && lua_pcall(act->script_state, 0, 0, 0)) {
+                    const char* err = lua_tostring(act->script_state, -1);
+                    add_message(COLOR_WARNING, err);
+                    lua_pop(act->script_state, 1);
+                }
                 free(path);
                 free(a);
                 a = 0;
@@ -70,10 +76,16 @@ actor* create_actor(const char* file)
 
 void init_actor(actor* act)
 {
-    lua_getglobal(act->script_state, "onCreate");
-    if(lua_isfunction(act->script_state, -1))
-        lua_pcall(act->script_state, 0, 0, 0);
-    lua_pop(act->script_state, 1);
+    lua_getglobal(act->script_state, "create");
+    if(!lua_isfunction(act->script_state, -1)) {
+        lua_pop(act->script_state, 1);
+    } else {
+        if(lua_pcall(act->script_state, 0, 0, 0)) {
+            const char* err = lua_tostring(act->script_state, -1);
+            add_message(COLOR_WARNING, err);
+            lua_pop(act->script_state, 1);
+        }
+    }
 }
 
 void kill_actor(actor* act)
