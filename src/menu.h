@@ -14,5 +14,7 @@ enum menu_selection {
 bool init_menu();
 int update_menu();
 void draw_menu();
+void hide_menu();
+void show_menu();
 
 #endif

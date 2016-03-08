@@ -11,6 +11,7 @@ int get_input()
 
     int res = getch();
     switch(res) {
+        { // DIRECTION INPUTS
         case 'h':
         case '4':
             last_input_direction = DIRECTION_WEST;
@@ -54,11 +55,29 @@ int get_input()
             last_input_direction = DIRECTION_SOUTHEAST;
             last_input_type = INPUT_DIRECTIONAL;
             break;
+    }
+    { // ACTION INPUTS
 
         case '\n':
             last_input_action = ACTION_SELECT;
             last_input_type = INPUT_ACTION;
             break;
+
+        case 'q':
+            last_input_action = ACTION_QUIT;
+            last_input_type = INPUT_ACTION;
+            break;
+
+        case '[':
+            last_input_action = ACTION_SCROLL_UP;
+            last_input_type = INPUT_ACTION;
+            break;
+
+        case ']':
+            last_input_action = ACTION_SCROLL_DOWN;
+            last_input_type = INPUT_ACTION;
+            break;
+    }
     }
 
     return last_input_type;

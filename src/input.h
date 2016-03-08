@@ -30,6 +30,9 @@ enum input_directions {
 enum input_actions {
     ACTION_INVALID = -1,
     ACTION_SELECT,
+    ACTION_QUIT,
+    ACTION_SCROLL_UP,
+    ACTION_SCROLL_DOWN,
     ACTION_COUNT,
 };
 

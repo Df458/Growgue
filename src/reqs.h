@@ -2,8 +2,8 @@
 #define REGQS_H
 #include <curses.h>
 
-#define MIN_W 80
-#define MIN_H 20
+#define MIN_W 90
+#define MIN_H 35
 #define MIN_COLS   16
 #define BEST_COLS  256
 #define MIN_PAIRS  16
