@@ -23,6 +23,8 @@ actor* create_actor(const char* file)
     luaL_setfuncs(act->script_state, global_funcs, 0);
     lua_setglobal(act->script_state, "game");
 
+    act->to_kill = false;
+
     xmlChar* a = 0;
     for(xmlNodePtr node = root->children; node; node = node->next) {
         if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"display")) {
@@ -31,7 +33,7 @@ actor* create_actor(const char* file)
                 free(a);
                 a = 0;
             }
-            if((a = xmlGetProp(node, (const xmlChar*)"display"))) {
+            if((a = xmlGetProp(node, (const xmlChar*)"char"))) {
                 act->display = a[0];
                 free(a);
                 a = 0;
@@ -90,7 +92,16 @@ void init_actor(actor* act)
 
 void kill_actor(actor* act)
 {
-    fprintf(stderr, "kill_actor() stub!\n");
+    lua_getglobal(act->script_state, "kill");
+    if(!lua_isfunction(act->script_state, -1)) {
+        lua_pop(act->script_state, 1);
+    } else {
+        if(lua_pcall(act->script_state, 0, 0, 0)) {
+            const char* err = lua_tostring(act->script_state, -1);
+            add_message(COLOR_WARNING, err);
+            lua_pop(act->script_state, 1);
+        }
+    }
     free(act);
 }
 

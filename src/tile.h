@@ -1,5 +1,6 @@
 #ifndef TILE_H
 #define TILE_H
+#include "actor.h"
 
 typedef struct tile
 {
@@ -8,6 +9,8 @@ typedef struct tile
 
     int  cost;
     bool solid;
+
+    actor* actor_ref;
 }
 tile;
 

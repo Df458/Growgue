@@ -3,11 +3,14 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <stdbool.h>
 
 typedef struct actor
 {
     int color;
     int display;
+
+    bool to_kill;
 
     int x;
     int y;

@@ -6,3 +6,7 @@ function create()
         game.log("warning", "You aren't a nice person");
     end
 end
+
+function kill()
+    game.log("error", "Bye now!");
+end

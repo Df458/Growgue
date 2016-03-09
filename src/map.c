@@ -29,9 +29,10 @@ map* create_map(int width, int height)
     new_map->tiles = calloc(new_map->width * new_map->height, sizeof(tile));
     for(int i = 0; i < new_map->height; ++i) {
         for(int j = 0; j < new_map->width; ++j) {
-            new_map->tiles[i * new_map->width + j].display = rand() % 45 + 45;
-            new_map->tiles[i * new_map->width + j].color = rand() % 5;
+            new_map->tiles[i * new_map->width + j].display = '.';
+            new_map->tiles[i * new_map->width + j].color = 0;
             new_map->tiles[i * new_map->width + j].solid = false;
+            new_map->tiles[i * new_map->width + j].actor_ref = 0;
         }
     }
 
@@ -63,6 +64,10 @@ void draw_map(int x, int y, map* to_draw)
     for(int i = ymin; i < ymax; ++i) {
         wmove(map_win, i - ymin + 1, 1);
         for(int j = xmin; j < xmax; ++j) {
+            if(to_draw->tiles[i * to_draw->width + j].actor_ref) {
+                set_color(map_win, to_draw->tiles[i * to_draw->width + j].actor_ref->color);
+                waddch(map_win, to_draw->tiles[i * to_draw->width + j].actor_ref->display);
+            }
             set_color(map_win, to_draw->tiles[i * to_draw->width + j].color);
             waddch(map_win, to_draw->tiles[i * to_draw->width + j].display);
         }
@@ -76,8 +81,24 @@ void draw_map(int x, int y, map* to_draw)
 
 bool can_move(int x, int y, map* to_move)
 {
-    // TODO: Take entities into account
+    int px, py;
+    player_get_position(&px, &py);
+    if(px == x && py == y)
+        return false;
     if(x < 0 || y < 0 || x >= to_move->width || y >= to_move->height)
         return false;
-    return !to_move->tiles[y * to_move->width + x].solid;
+    return !to_move->tiles[y * to_move->width + x].solid && !to_move->tiles[y * to_move->width + x].actor_ref;
+}
+
+bool spawn_actor(int x, int y, const char* file, map* to_spawn)
+{
+    if(can_move(x, y, to_spawn)) {
+        actor* act = create_actor(file);
+        to_spawn->tiles[y * to_spawn->width + x].actor_ref = act;
+        act->x = x;
+        act->y = y;
+        init_actor(act);
+        return true;
+    }
+    return false;
 }
