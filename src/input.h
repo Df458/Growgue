@@ -33,6 +33,7 @@ enum input_actions {
     ACTION_QUIT,
     ACTION_SCROLL_UP,
     ACTION_SCROLL_DOWN,
+    ACTION_TILL,
     ACTION_COUNT,
 };
 

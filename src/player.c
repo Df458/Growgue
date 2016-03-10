@@ -107,6 +107,9 @@ void update_player()
         case INPUT_DIRECTIONAL:
             player_move(get_last_direction());
             break;
+        case INPUT_ACTION:
+            // TODO: Perform actions
+            break;
     }
 }
 

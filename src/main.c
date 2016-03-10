@@ -40,7 +40,7 @@ void init_game()
 
     init_log(log_win);
     init_map(map_win);
-    test_map = create_map(80, 24);
+    test_map = create_map(80, 24, GEN_WALK);
     init_player(map_win, stats_win, hp_win, test_map);
     spawn_actor(47, 15, "data/test.actor", test_map);
     draw_map(0, 0, test_map);
@@ -65,6 +65,7 @@ bool update_game()
 
 void end_game()
 {
+    destroy_map(test_map);
     cleanup_player();
     refresh();
 }

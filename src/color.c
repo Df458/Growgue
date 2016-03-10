@@ -16,6 +16,8 @@ const char* pair_names[] =
     "HP critical",
     "EP critical",
 
+    "Soil",
+
     "warning",
     "error",
 };
@@ -25,8 +27,11 @@ enum low_pair_ids {
     YELLOW_BLACK,
     GREEN_BLACK,
     RED_BLACK,
+    BROWN_BLACK,
     BLUE_BLACK
 };
+
+#define COLOR_BROWN COLOR_MAGENTA
 
 void set_hicolor(bool hi)
 {
@@ -46,11 +51,13 @@ void set_hicolor(bool hi)
             init_color(COLOR_YELLOW, 1000, 1000, 0);
             init_color(COLOR_BLUE, 0, 0, 1000);
             init_color(COLOR_RED, 1000, 0, 0);
+            init_color(COLOR_BROWN, 500, 500, 0);
         }
         init_pair(YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
         init_pair(GREEN_BLACK, COLOR_GREEN, COLOR_BLACK);
         init_pair(RED_BLACK, COLOR_RED, COLOR_BLACK);
         init_pair(BLUE_BLACK, COLOR_BLUE, COLOR_BLACK);
+        init_pair(BROWN_BLACK, COLOR_BROWN, COLOR_BLACK);
         pairs[COLOR_SELECTION] = YELLOW_BLACK;
         pairs[COLOR_HP_GOOD]   = GREEN_BLACK;
         pairs[COLOR_HP_LOW]    = YELLOW_BLACK;
@@ -59,6 +66,7 @@ void set_hicolor(bool hi)
         pairs[COLOR_EP_LOW]    = YELLOW_BLACK;
         pairs[COLOR_EP_CRIT]   = RED_BLACK;
         pairs[COLOR_WARNING]   = YELLOW_BLACK;
+        pairs[COLOR_SOIL]      = BROWN_BLACK;
         pairs[COLOR_FATAL]     = RED_BLACK;
     }
 }

@@ -26,23 +26,74 @@ map* create_map(int width, int height, int gen_type)
     new_map->width = width;
     new_map->height = height;
     new_map->tiles = calloc(new_map->width * new_map->height, sizeof(tile));
+    new_map->actor_count = 0;
+    new_map->actors = 0;
 
-    switch(gen_type) {
-        case GEN_WALK:
-            // TODO: Drunkard's walk
-            break;
-    }
     for(int i = 0; i < new_map->height; ++i) {
         for(int j = 0; j < new_map->width; ++j) {
-            new_map->tiles[i * new_map->width + j].display = '.';
+            new_map->tiles[i * new_map->width + j].display = '#';
             new_map->tiles[i * new_map->width + j].color = 0;
-            new_map->tiles[i * new_map->width + j].solid = false;
+            new_map->tiles[i * new_map->width + j].solid = true;
             new_map->tiles[i * new_map->width + j].actor_ref = 0;
             new_map->tiles[i * new_map->width + j].dist = 0;
             new_map->tiles[i * new_map->width + j].checked = false;
-            if(rand() % 3 == 0) {
-                new_map->tiles[i * new_map->width + j].display = '#';
-                new_map->tiles[i * new_map->width + j].solid = true;
+            new_map->tiles[i * new_map->width + j].can_till = false;
+            new_map->tiles[i * new_map->width + j].tilled = false;
+        }
+    }
+    switch(gen_type) {
+        case GEN_WALK: {
+            // TODO: Drunkard's walk
+            int tilecount = width * height * 0.6 + (rand() % width - (width * 0.5));
+            int i = 0;
+            int cx[3];
+            int csx = rand() % (width - 2) + 1;
+            int cy[3];
+            int csy = rand() % (height - 2) + 1;
+            for(int j = 0; j < 3; ++j) {
+                cx[j] = csx;
+                cy[j] = csy;
+            }
+            while(tilecount > 0 && i < tilecount * 10) {
+                for(int j = 0; j < 3; ++j) {
+                    int index = cy[j] * width + cx[j];
+                    if(new_map->tiles[index].display == '#')
+                        tilecount--;
+                    new_map->tiles[index].display = '.';
+                    new_map->tiles[index].color = 0;
+                    new_map->tiles[index].solid = false;
+                    new_map->tiles[index].actor_ref = 0;
+                    i++;
+
+                    int cnx = cx[j];
+                    int cny = cy[j];
+                    if(rand() % 2)
+                        cnx = cx[j] + (rand() % 2 ? 1 : -1);
+                    else
+                        cny = cy[j] + (rand() % 2 ? 1 : -1);
+                    cx[j] = clamp(cnx, 1, width - 2);
+                    cy[j] = clamp(cny, 1, height - 2);
+                }
+            }
+            } break;
+    }
+
+    int patch_count = rand() % 8 + 2;
+    for(int i = 0; i < patch_count; ++i) {
+        int cx, cy;
+
+        do {
+            cx = rand() % (width - 2) + 1;
+            cy = rand() % (height - 2) + 1;
+        } while(new_map->tiles[cy * width + cx].solid == true);
+
+        int size = rand() % 5 + 1;
+        for(int j = clamp(cy - size, 1, height - 2); j < clamp(cy + size, 1, height - 2); ++j) {
+            for(int k = clamp(cy - size, 1, width - 2); k < clamp(cy + size, 1, width - 2); ++k) {
+                new_map->tiles[j * width + k].display = '.';
+                new_map->tiles[j * width + k].color = COLOR_SOIL;
+                new_map->tiles[j * width + k].solid = false;
+                new_map->tiles[j * width + k].can_till = true;
             }
         }
     }
@@ -66,6 +117,18 @@ void update_map(int delta, map* to_update)
         }
     }
     draw_map(x, y, to_update);
+}
+
+void destroy_map(map* to_destroy)
+{
+    for(int i = 0; i < to_destroy->actor_count; ++i) {
+        if(to_destroy->actors[i]) {
+            kill_actor(to_destroy->actors[i]);
+        }
+    }
+    free(to_destroy->actors);
+    free(to_destroy->tiles);
+    free(to_destroy);
 }
 
 void draw_map(int x, int y, map* to_draw)
@@ -137,7 +200,6 @@ bool spawn_actor(int x, int y, const char* file, map* to_spawn)
             }
         }
         if(!found) {
-            // TODO: Resize
             to_spawn->actors = realloc(to_spawn->actors, (to_spawn->actor_count + 10) * sizeof(actor*));
             to_spawn->actors[to_spawn->actor_count] = act;
             for(int i = to_spawn->actor_count + 1; i < to_spawn->actor_count + 10; ++i)

@@ -15,6 +15,8 @@ enum pair_ids {
     COLOR_HP_CRIT,
     COLOR_EP_CRIT,
 
+    COLOR_SOIL,
+
     COLOR_WARNING,
     COLOR_FATAL,
     COLOR_COUNT

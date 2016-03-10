@@ -13,6 +13,9 @@ typedef struct tile
     bool added;
     bool solid;
 
+    bool can_till;
+    bool tilled;
+
     actor* actor_ref;
 }
 tile;
