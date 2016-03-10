@@ -9,5 +9,6 @@ void draw_player(int x, int y);
 void cleanup_player();
 void player_get_position(int* px, int* py);
 void player_move(int direction);
+int damage_player(int damage);
 
 #endif

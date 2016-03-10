@@ -42,10 +42,7 @@ void init_game()
     init_map(map_win);
     test_map = create_map(80, 24);
     init_player(map_win, stats_win, hp_win, test_map);
-    spawn_actor(0, 1, "data/test.actor", test_map);
-    /* actor* test = create_actor("data/test.actor"); */
-    /* init_actor(test); */
-    /* kill_actor(test); */
+    spawn_actor(47, 15, "data/test.actor", test_map);
     draw_map(0, 0, test_map);
     draw_log();
 }

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "color.h"
 #include "input.h"
+#include "log.h"
 #include "player.h"
 
 WINDOW* map_win = 0;
@@ -12,6 +13,8 @@ WINDOW* hp_win = 0;
 
 static int hp_max = 0;
 static int ep_max = 0;
+static int str = 0;
+static int def = 0;
 
 static int hp_current;
 static int ep_current;
@@ -58,6 +61,7 @@ void draw_player(int x, int y)
             set_color(hp_win, COLOR_HP_CRIT);
         char* life_str = malloc(sizeof(char) * BAR_LENGTH + 1);
         memset(life_str, '=', sizeof(char) * len);
+        memset(life_str + len, ' ', sizeof(char) * (BAR_LENGTH - len));
         mvwaddstr(hp_win, 0, 1, life_str);
         free(life_str);
     }
@@ -76,6 +80,7 @@ void draw_player(int x, int y)
             set_color(hp_win, COLOR_EP_CRIT);
         char* life_str = malloc(sizeof(char) * BAR_LENGTH + 1);
         memset(life_str, '=', sizeof(char) * len);
+        memset(life_str + len, ' ', sizeof(char) * (BAR_LENGTH - len));
         mvwaddstr(hp_win, 0, BAR_LENGTH + 3, life_str);
         free(life_str);
     }
@@ -152,8 +157,30 @@ void player_move(int direction)
             dy = 1;
             break;
     }
-    if(can_move(x + dx, y + dy, current_map)) {
+    int res = can_move(x + dx, y + dy, current_map);
+    if(res == 1) {
         x += dx;
         y += dy;
+    } else if(res == 2) {
+        actor* act = get_actor_at(x + dx, y + dy, current_map);
+        int dmg = damage_actor(act, str);
+        char* damage_text = 0;
+        if(dmg > 0) {
+            int len = snprintf(0, 0, "You hit the %s for %d damage", act->name, dmg);
+            damage_text = calloc(len + 1, sizeof(char));
+            snprintf(damage_text, len + 1, "You hit the %s for %d damage", act->name, dmg);
+        } else {
+            int len = snprintf(0, 0, "You miss the %s", act->name);
+            damage_text = calloc(len + 1, sizeof(char));
+            snprintf(damage_text, len + 1, "You miss the %s", act->name);
+        }
+        add_message(COLOR_DEFAULT, damage_text);
+        free(damage_text);
     }
+}
+
+int damage_player(int damage)
+{
+    hp_current -= damage - def;
+    return damage - def;
 }

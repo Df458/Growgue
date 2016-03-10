@@ -8,6 +8,9 @@ typedef struct tile
     int color;
 
     int  cost;
+    int  dist;
+    bool checked;
+    bool added;
     bool solid;
 
     actor* actor_ref;
