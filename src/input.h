@@ -34,6 +34,9 @@ enum input_actions {
     ACTION_SCROLL_UP,
     ACTION_SCROLL_DOWN,
     ACTION_TILL,
+    ACTION_PLANT,
+    ACTION_PICKUP,
+    ACTION_APPLY,
     ACTION_COUNT,
 };
 

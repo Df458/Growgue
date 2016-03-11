@@ -211,6 +211,11 @@ bool spawn_actor(int x, int y, const char* file, map* to_spawn)
     return false;
 }
 
+void spawn_item(int x, int y, const char* file, map* to_spawn)
+{
+    // TODO: Spawn the item
+}
+
 struct coord_pair { int x; int y; };
 
 void add_neightbors(queue* s, int x, int y, map* to_update)
@@ -282,4 +287,19 @@ bool step_towards_player(actor* act, map* cmap)
 actor* get_actor_at(int x, int y, map* cmap)
 {
     return cmap->tiles[y * cmap->width + x].actor_ref;
+}
+
+void till(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+    if(!cmap->tiles[id].can_till) {
+        // TODO: Log an error
+        return;
+    }
+    if(cmap->tiles[id].tilled) {
+        // TODO: Log an error
+        return;
+    }
+    cmap->tiles[id].tilled = true;
+    // TODO: Log a message
 }

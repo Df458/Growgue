@@ -59,6 +59,16 @@ int get_input()
             last_input_direction = DIRECTION_SOUTHEAST;
             last_input_type = INPUT_DIRECTIONAL;
             break;
+
+        case '<':
+            last_input_direction = DIRECTION_UP;
+            last_input_type = INPUT_DIRECTIONAL;
+            break;
+
+        case '>':
+            last_input_direction = DIRECTION_DOWN;
+            last_input_type = INPUT_DIRECTIONAL;
+            break;
     }
     { // ACTION INPUTS
 
@@ -79,6 +89,22 @@ int get_input()
 
         case ']':
             last_input_action = ACTION_SCROLL_DOWN;
+            last_input_type = INPUT_ACTION;
+            break;
+        case 't':
+            last_input_action = ACTION_TILL;
+            last_input_type = INPUT_ACTION;
+            break;
+        case 'p':
+            last_input_action = ACTION_PLANT;
+            last_input_type = INPUT_ACTION;
+            break;
+        case ',':
+            last_input_action = ACTION_PICKUP;
+            last_input_type = INPUT_ACTION;
+            break;
+        case 'a':
+            last_input_action = ACTION_APPLY;
             last_input_type = INPUT_ACTION;
             break;
     }
