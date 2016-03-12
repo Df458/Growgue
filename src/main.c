@@ -25,19 +25,15 @@ enum game_state_type
 
 static int game_state = STATE_MENU;
 static bool dead = false;
-map* test_map;
+static map** world;
+static int current_level = 0;
 
 void init_game()
 {
     WINDOW* map_win = newwin(24, 80, 0, 0);
     WINDOW* area_win = newwin(8, 10, 0, 80);
-    wborder(area_win, ' ', 179, 196, 205, 196, 191, 205, 181);
-    wrefresh(area_win);
     WINDOW* stats_win = newwin(8, 10, 8, 80);
-    wborder(stats_win, ' ', 179, ' ', 205, ' ', 179, 205, 181);
     WINDOW* examine_win = newwin(8, 10, 16, 80);
-    wborder(examine_win, ' ', 179, ' ', 205, ' ', 179, 205, 181);
-    wrefresh(examine_win);
     WINDOW* hp_win = newwin(1, 90, 24, 0);
     WINDOW* log_win = newwin(10, 90, 25, 0);
 
@@ -46,16 +42,21 @@ void init_game()
     init_log(log_win);
     init_map(map_win);
     init_items();
-    test_map = create_map(80, 24, GEN_WALK);
-    init_player(map_win, stats_win, hp_win, test_map);
+    /* test_map = create_map(80, 24, GEN_WALK); */
+    world = calloc(LEVEL_COUNT, sizeof(map*));
+    world[0] = create_map(78, 22, GEN_WALK, false, true);
+    for(int i = 1; i < LEVEL_COUNT - 1; ++i)
+        world[i] = create_map(80 + 10 * (i - 1), 24 + 4 * (i - 1), GEN_WALK, true, true);
+    world[LEVEL_COUNT - 1] = create_map(78, 22, GEN_WALK, true, false);
+    init_player(map_win, stats_win, hp_win, area_win, examine_win, world[0]);
     int x, y;
-    get_random_empty_tile(&x, &y, test_map);
-    spawn_actor(x, y, "data/test.actor", test_map);
-    get_random_empty_tile(&x, &y, test_map);
-    spawn_item(x, y, "data/test.item", test_map);
-    get_random_empty_tile(&x, &y, test_map);
+    get_random_empty_tile(&x, &y, world[0]);
+    spawn_actor(x, y, "data/test.actor", world[0]);
+    get_random_empty_tile(&x, &y, world[0]);
+    spawn_item(x, y, "data/test.item", world[0]);
+    get_random_empty_tile(&x, &y, world[0]);
     player_set_position(x, y);
-    draw_map(x, y, test_map);
+    draw_map(x, y, world[0]);
     draw_log();
 }
 
@@ -74,7 +75,11 @@ bool update_game()
             dead = true;
         } else {
             update_player();
-            update_map(1, test_map);
+            if(get_current_floor() != current_level) {
+                set_current_map(world[get_current_floor()], current_level < get_current_floor(), current_level > get_current_floor());
+                current_level = get_current_floor();
+            }
+            update_map(1, world[current_level]);
         }
         draw_log();
     }
@@ -83,8 +88,11 @@ bool update_game()
 
 void end_game()
 {
+    move(0, 0);
     cleanup_items();
-    destroy_map(test_map);
+    for(int i = 0; i < LEVEL_COUNT; ++i)
+        destroy_map(world[i]);
+    free(world);
     cleanup_player();
     cleanup_log();
     refresh();

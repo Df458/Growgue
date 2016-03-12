@@ -9,6 +9,8 @@
 #define MIN_PAIRS  16
 #define BEST_PAIRS 256
 
+#define LEVEL_COUNT 15
+
 // Awful hack. For some reason, PDCurses always returns 1x1 from getmaxyx, so
 // this is the best we can do :/
 #if defined PDCURSES

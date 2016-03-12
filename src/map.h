@@ -16,11 +16,17 @@ typedef struct map
     int actor_count;
     int width;
     int height;
+
+    int ds_x;
+    int ds_y;
+
+    int us_x;
+    int us_y;
 }
 map;
 
 void init_map(WINDOW* map);
-map* create_map();
+map* create_map(int width, int height, int gen_type, bool has_up, bool has_down);
 void update_map(int delta, map* to_update);
 void destroy_map(map* to_destroy);
 void draw_map(int x, int y, map* to_draw);
@@ -44,5 +50,7 @@ void water_tile(int x, int y, map* cmap);
 void get_random_empty_tile(int* x, int* y, map* cmap);
 void get_tile_growth_info(int x, int y, float* w, float* n, float* m, map* cmap);
 void update_tile_growth_info(int x, int y, float w, float n, float m, map* cmap);
+bool is_down_stairs(int x, int y, map* cmap);
+bool is_up_stairs(int x, int y, map* cmap);
 
 #endif

@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include "color.h"
@@ -6,9 +7,12 @@
 #include "log.h"
 #include "luafunc.h"
 #include "player.h"
+#include "reqs.h"
 
 static WINDOW* map_win = 0;
 static WINDOW* stats_win = 0;
+static WINDOW* area_win = 0;
+static WINDOW* examine_win = 0;
 static WINDOW* hp_win = 0;
 
 #define BAR_LENGTH 43
@@ -18,6 +22,10 @@ static int ep_max = 0;
 static int str = 0;
 static int def = 0;
 
+static int xp = 0;
+static int next = 25;
+static int level = 1;
+
 static item* equipment[3] = { 0 };
 
 static int hp_current;
@@ -25,6 +33,7 @@ static int ep_current;
 
 static int x = 0;
 static int y = 0;
+static int z = 0;
 
 static map* current_map = 0;
 static item** inventory = 0;
@@ -39,13 +48,19 @@ void init_stats()
 
     hp_current = hp_max;
     ep_current = ep_max;
+
+    xp = 0;
+    next = 25;
+    level = 1;
 }
 
-void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, map* start_map)
+void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, WINDOW* area, WINDOW* examine, map* start_map)
 {
     map_win = mapw;
     stats_win = stats;
     hp_win = hp;
+    area_win = area;
+    examine_win = examine;
 
     init_stats();
 
@@ -54,6 +69,7 @@ void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, map* start_map)
 
 void draw_player(int x, int y)
 {
+    wborder(hp_win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
     if(hp_current > 0) {
         float ratio = (float)hp_current / (float)hp_max;
         int len = BAR_LENGTH * ratio;
@@ -99,16 +115,25 @@ void draw_player(int x, int y)
     mvwaddch(hp_win, 0, 45, 179);
     mvwaddch(hp_win, 0, 89, 179);
 
+    wborder(stats_win, ' ', 179, ' ', 205, ' ', 179, 205, 181);
     mvwprintw(stats_win, 0, 0, "HP: %-5d", hp_max);
     mvwprintw(stats_win, 1, 0, "EP: %-5d", ep_max);
     mvwprintw(stats_win, 3, 0, "STR: %-4d", str);
     mvwprintw(stats_win, 4, 0, "DEF: %-4d", def);
 
+    move(x, y);
     mvwaddch(map_win, x, y, '@');
+    mvwprintw(map_win, 23, 2, "LEVEL: %d", level);
+    mvwprintw(map_win, 23, 12, "DLEVEL: %02d", z);
+
+    wborder(examine_win, ' ', 179, ' ', 205, ' ', 179, 205, 181);
+    wborder(area_win, ' ', 179, 196, 205, 196, 191, 205, 181);
 
     wrefresh(map_win);
     wrefresh(stats_win);
     wrefresh(hp_win);
+    wrefresh(examine_win);
+    wrefresh(area_win);
 }
 
 void update_player()
@@ -128,6 +153,8 @@ void cleanup_player()
    delwin(map_win);
    delwin(stats_win);
    delwin(hp_win);
+   delwin(area_win);
+   delwin(examine_win);
 }
 
 void player_get_position(int* px, int* py)
@@ -175,6 +202,14 @@ void player_move(int direction)
             dx = -1;
             dy = 1;
             break;
+        case DIRECTION_UP:
+            if(z > 0 && is_up_stairs(x, y, current_map))
+                z--;
+            return;
+        case DIRECTION_DOWN:
+            if(z < LEVEL_COUNT - 1 && is_down_stairs(x, y, current_map))
+                z++;
+            return;
     }
     int res = can_move(x + dx, y + dy, current_map);
     if(res == 1) {
@@ -382,4 +417,31 @@ void insert_player_into_lua(lua_State* state)
     luaL_setfuncs(state, player_meta, 0);
     lua_setmetatable(state, 1);
     lua_setglobal(state, "player");
+}
+
+int get_current_floor()
+{
+    return z;
+}
+
+void set_current_map(map* map, bool down, bool up)
+{
+    current_map = map;
+    if(down) {
+        x = current_map->us_x;
+        y = current_map->us_y;
+    } else if(up) {
+        x = current_map->ds_x;
+        y = current_map->ds_y;
+    }
+}
+
+void add_xp(int new_xp)
+{
+    xp += new_xp;
+
+    if(xp >= next) {
+        level += 1;
+        next = 25 + (20 * level) + (5 * pow((level + 1) / 2, 2));
+    }
 }

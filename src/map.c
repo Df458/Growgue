@@ -21,7 +21,7 @@ void init_map(WINDOW* map)
     map_win = map;
 }
 
-map* create_map(int width, int height, int gen_type)
+map* create_map(int width, int height, int gen_type, bool has_up, bool has_down)
 {
     map* new_map = malloc(sizeof(map));
 
@@ -104,6 +104,25 @@ map* create_map(int width, int height, int gen_type)
                 new_map->tiles[j * width + k].can_till = true;
             }
         }
+    }
+
+    // Stairs
+    if(has_down) {
+        get_random_empty_tile(&new_map->ds_x, &new_map->ds_y, new_map);
+        new_map->tiles[new_map->ds_y * width + new_map->ds_x].display = '>';
+        new_map->tiles[new_map->ds_y * width + new_map->ds_x].color = COLOR_DEFAULT;
+        new_map->tiles[new_map->ds_y * width + new_map->ds_x].solid = false;
+        new_map->tiles[new_map->ds_y * width + new_map->ds_x].can_till = false;
+    }
+
+    if(has_up) {
+        do {
+            get_random_empty_tile(&new_map->us_x, &new_map->us_y, new_map);
+        } while(new_map->us_x == new_map->ds_x && new_map->us_y == new_map->ds_y);
+        new_map->tiles[new_map->us_y * width + new_map->us_x].display = '<';
+        new_map->tiles[new_map->us_y * width + new_map->us_x].color = COLOR_DEFAULT;
+        new_map->tiles[new_map->us_y * width + new_map->us_x].solid = false;
+        new_map->tiles[new_map->us_y * width + new_map->us_x].can_till = false;
     }
 
     return new_map;
@@ -501,4 +520,14 @@ void update_tile_growth_info(int x, int y, float w, float n, float m, map* cmap)
     cmap->tiles[index].water -= w;
     cmap->tiles[index].nutrients -= n;
     cmap->tiles[index].minerals -= m;
+}
+
+bool is_down_stairs(int x, int y, map* cmap)
+{
+    return x == cmap->ds_x && y == cmap->ds_y;
+}
+
+bool is_up_stairs(int x, int y, map* cmap)
+{
+    return x == cmap->us_x && y == cmap->us_y;
 }

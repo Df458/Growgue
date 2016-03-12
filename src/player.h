@@ -24,7 +24,7 @@ enum equipment_slot
     SLOT_COUNT
 };
 
-void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, map* start_map);
+void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, WINDOW* area, WINDOW* examine, map* start_map);
 void update_player();
 void draw_player(int x, int y);
 void cleanup_player();
@@ -36,6 +36,9 @@ int damage_player(int damage);
 bool is_dead();
 void add_item(item* item);
 void remove_item(item* item, int quantity);
+int get_current_floor();
+void set_current_map(map* map, bool down, bool up);
+void add_xp(int xp);
 
 void insert_player_into_lua(lua_State* state);
 int lua_player_index(lua_State* state);
