@@ -26,10 +26,16 @@ void destroy_map(map* to_destroy);
 void draw_map(int x, int y, map* to_draw);
 int can_move(int x, int y, map* to_move);
 bool spawn_actor(int x, int y, const char* file, map* to_spawn);
-void spawn_item(int x, int y, const char* file, map* to_spawn);
+bool spawn_item(int x, int y, const char* file, map* to_spawn);
 void set_weights(int x, int y, map* to_update);
 bool step_towards_player(actor* act, map* cmap);
 actor* get_actor_at(int x, int y, map* cmap);
 void till(int x, int y, map* cmap);
+int get_cost(int x, int y, map* cmap);
+void place_item(int x, int y, item* it, map* cmap);
+void take_item(int x, int y, item* it, map* cmap);
+void describe_ground(int x, int y, map* cmap);
+item** items_at(int x, int y, map* cmap);
+int item_count_at(int x, int y, map* cmap);
 
 #endif

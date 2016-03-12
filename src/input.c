@@ -103,6 +103,10 @@ int get_input()
             last_input_action = ACTION_PICKUP;
             last_input_type = INPUT_ACTION;
             break;
+        case 'd':
+            last_input_action = ACTION_DROP;
+            last_input_type = INPUT_ACTION;
+            break;
         case 'a':
             last_input_action = ACTION_APPLY;
             last_input_type = INPUT_ACTION;

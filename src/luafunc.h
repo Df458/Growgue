@@ -4,6 +4,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+bool callback(const char* name, lua_State* state);
+
 int lua_log_message(lua_State* state);
 int lua_ask_question(lua_State* state);
 

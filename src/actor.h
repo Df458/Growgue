@@ -35,6 +35,17 @@ void kill_actor(actor* act);
 int lua_kill_actor(lua_State* state);
 int damage_actor(actor* act, int damage);
 
+void insert_actor_into_lua(lua_State* state, actor*);
+int lua_actor_index(lua_State* state);
+int lua_actor_newindex(lua_State* state);
+
+static const luaL_Reg actor_meta[] =
+{
+    {"__index", lua_actor_index},
+    {"__newindex", lua_actor_newindex},
+    {0, 0}
+};
+
 static const luaL_Reg actor_funcs[] =
 {
     {"kill", lua_kill_actor},

@@ -21,7 +21,7 @@ OBJPATH=obj
 SRCPATH=src
 
 # Flags
-CFLAGS=-Wall -Werror -D BUILD_TYPE=$(BUILDTYPE) -D PROJECT_NAME="$(APPNAME)" `$(PKGCONFIG) --cflags lua libxml-2.0`
+CFLAGS=-Wall -Werror -Wno-unused-but-set-variable -D BUILD_TYPE=$(BUILDTYPE) -D PROJECT_NAME="$(APPNAME)" `$(PKGCONFIG) --cflags lua libxml-2.0`
 CLIBS=-l$(CURSES) `$(PKGCONFIG) --libs lua, libxml-2.0`
 
 ifeq ($(CURSES), pdcurses)

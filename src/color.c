@@ -83,3 +83,8 @@ int color_str(const char* str)
             return i;
     return 0;
 }
+
+const char* get_color_str(int color)
+{
+    return pair_names[color];
+}

@@ -25,5 +25,6 @@ enum pair_ids {
 void set_hicolor(bool hi);
 void set_color(WINDOW* win, int id);
 int color_str(const char* str);
+const char* get_color_str(int color);
 
 #endif

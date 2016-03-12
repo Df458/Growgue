@@ -1,6 +1,7 @@
 #ifndef TILE_H
 #define TILE_H
 #include "actor.h"
+#include "item.h"
 
 typedef struct tile
 {
@@ -17,6 +18,8 @@ typedef struct tile
     bool tilled;
 
     actor* actor_ref;
+    item** item_list;
+    int item_count;
 }
 tile;
 

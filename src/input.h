@@ -36,6 +36,7 @@ enum input_actions {
     ACTION_TILL,
     ACTION_PLANT,
     ACTION_PICKUP,
+    ACTION_DROP,
     ACTION_APPLY,
     ACTION_COUNT,
 };

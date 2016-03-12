@@ -5,6 +5,7 @@
 
 #include "actor.h"
 #include "color.h"
+#include "item.h"
 #include "input.h"
 #include "log.h"
 #include "macro.h"
@@ -22,6 +23,7 @@ enum game_state_type
 };
 
 static int game_state = STATE_MENU;
+static bool dead = false;
 map* test_map;
 
 void init_game()
@@ -38,11 +40,15 @@ void init_game()
     WINDOW* hp_win = newwin(1, 90, 24, 0);
     WINDOW* log_win = newwin(10, 90, 25, 0);
 
+    dead = false;
+
     init_log(log_win);
     init_map(map_win);
+    init_items();
     test_map = create_map(80, 24, GEN_WALK);
     init_player(map_win, stats_win, hp_win, test_map);
     spawn_actor(47, 15, "data/test.actor", test_map);
+    spawn_item(1, 1, "data/test.item", test_map);
     draw_map(0, 0, test_map);
     draw_log();
 }
@@ -55,9 +61,15 @@ bool update_game()
     else if(in == INPUT_ACTION && (get_last_action() == ACTION_SCROLL_UP || get_last_action() == ACTION_SCROLL_DOWN)) {
         log_scroll(get_last_action() == ACTION_SCROLL_UP);
         draw_log();
-    } else {
-        update_player();
-        update_map(1, test_map);
+    } else if(!dead) {
+        if(is_dead()) {
+            add_message(COLOR_HP_CRIT, "Oh dear, you've died!");
+            add_message(COLOR_DEFAULT, "Press q to return to the main menu");
+            dead = true;
+        } else {
+            update_player();
+            update_map(1, test_map);
+        }
         draw_log();
     }
     return true;
@@ -65,8 +77,10 @@ bool update_game()
 
 void end_game()
 {
+    cleanup_items();
     destroy_map(test_map);
     cleanup_player();
+    cleanup_log();
     refresh();
 }
 

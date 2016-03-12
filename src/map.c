@@ -2,6 +2,7 @@
 
 #include "color.h"
 #include "log.h"
+#include "luafunc.h"
 #include "player.h"
 #include "macro.h"
 #include "map.h"
@@ -39,6 +40,8 @@ map* create_map(int width, int height, int gen_type)
             new_map->tiles[i * new_map->width + j].checked = false;
             new_map->tiles[i * new_map->width + j].can_till = false;
             new_map->tiles[i * new_map->width + j].tilled = false;
+            new_map->tiles[i * new_map->width + j].item_count = 0;
+            new_map->tiles[i * new_map->width + j].item_list = 0;
         }
     }
     switch(gen_type) {
@@ -152,13 +155,17 @@ void draw_map(int x, int y, map* to_draw)
                 set_color(map_win, to_draw->tiles[i * to_draw->width + j].actor_ref->color);
                 waddch(map_win, to_draw->tiles[i * to_draw->width + j].actor_ref->display);
             } else {
-                /* if(to_draw->tiles[i * to_draw->width + j].dist <= 9 && to_draw->tiles[i * to_draw->width + j].dist >= 0) { */
-                /*     set_color(map_win, to_draw->tiles[i * to_draw->width + j].color); */
-                /*     waddch(map_win, '0' + to_draw->tiles[i * to_draw->width + j].dist); */
-                /* } else { */
-                set_color(map_win, to_draw->tiles[i * to_draw->width + j].color);
-                waddch(map_win, to_draw->tiles[i * to_draw->width + j].display);
-                /* } */
+                int k;
+                for(k = 0; k < to_draw->tiles[i * to_draw->width + j].item_count; ++k)
+                    if(to_draw->tiles[i * to_draw->width + j].item_list[k] != 0) {
+                        set_color(map_win, to_draw->tiles[i * to_draw->width + j].item_list[k]->color);
+                        waddch(map_win, to_draw->tiles[i * to_draw->width + j].item_list[k]->display);
+                        break;
+                    }
+                if(k == to_draw->tiles[i * to_draw->width + j].item_count) {
+                    set_color(map_win, to_draw->tiles[i * to_draw->width + j].color);
+                    waddch(map_win, to_draw->tiles[i * to_draw->width + j].display);
+                }
             }
         }
     }
@@ -211,9 +218,17 @@ bool spawn_actor(int x, int y, const char* file, map* to_spawn)
     return false;
 }
 
-void spawn_item(int x, int y, const char* file, map* to_spawn)
+bool spawn_item(int x, int y, const char* file, map* to_spawn)
 {
-    // TODO: Spawn the item
+    if(can_move(x, y, to_spawn)) {
+        item* it = create_item(file);
+        if(!it) {
+            fprintf(stderr, "Couldn't spawn item");
+            return false;
+        }
+        place_item(x, y, it, to_spawn);
+    }
+    return false;
 }
 
 struct coord_pair { int x; int y; };
@@ -279,8 +294,7 @@ bool step_towards_player(actor* act, map* cmap)
         act->y = pos.y;
         cmap->tiles[act->y * cmap->width + act->x].actor_ref = act;
         return true;
-    } else
-        fprintf(stderr, ":(\n)");
+    }
     return false;
 }
 
@@ -293,13 +307,79 @@ void till(int x, int y, map* cmap)
 {
     int id = y * cmap->width + x;
     if(!cmap->tiles[id].can_till) {
-        // TODO: Log an error
+        add_message(COLOR_WARNING, "There is no soil to till here!");
         return;
     }
     if(cmap->tiles[id].tilled) {
-        // TODO: Log an error
+        add_message(COLOR_WARNING, "The soil here is already tilled!");
         return;
     }
     cmap->tiles[id].tilled = true;
-    // TODO: Log a message
+    cmap->tiles[id].display = '=';
+    add_message(COLOR_DEFAULT, "You till the soil.");
+}
+
+int get_cost(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+    return cmap->tiles[id].cost;
+}
+
+void place_item(int x, int y, item* it, map* cmap)
+{
+    it->x = x;
+    it->y = y;
+    it->on_ground = true;
+
+    int id = y * cmap->width + x;
+
+    tile* t = &cmap->tiles[id];
+    int i;
+    for(i = 0; i < t->item_count; ++i) {
+        if(t->item_list[i] == 0)
+            break;
+    }
+    if(i == t->item_count) {
+        t->item_count += 5;
+        t->item_list = realloc(t->item_list, t->item_count * sizeof(item*));
+        for(int j = i; j < i + 5; ++j) {
+            t->item_list[j] = 0;
+        }
+    }
+    t->item_list[i] = it;
+}
+
+void take_item(int x, int y, item* it, map* cmap)
+{
+    int id = y * cmap->width + x;
+    for(int i = 0; i < cmap->tiles[id].item_count; ++i) {
+        if(cmap->tiles[id].item_list[i] == it)
+            cmap->tiles[id].item_list[i] = 0;
+    }
+}
+
+void describe_ground(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+
+    tile* t = &cmap->tiles[id];
+
+    for(int i = 0; i < t->item_count; ++i) {
+        if(t->item_list[i] != 0) {
+            printf_message(COLOR_DEFAULT, "You see %d %s on the ground here", t->item_list[i]->count, t->item_list[i]->name);
+            callback("step", t->item_list[i]->script_state);
+        }
+    }
+}
+
+item** items_at(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+    return cmap->tiles[id].item_list;
+}
+
+int item_count_at(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+    return cmap->tiles[id].item_count;
 }

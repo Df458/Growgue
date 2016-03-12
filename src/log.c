@@ -25,6 +25,16 @@ void init_log(WINDOW* log)
     wrefresh(log_win);
 }
 
+void cleanup_log()
+{
+    log_win = 0;
+    log_start = 0;
+    log_end = 0;
+    message_count = 0;
+    scrollback_pos = 0;
+    dirty = true;
+}
+
 static void _add_message(int color, char* message)
 {
     dirty = true;
@@ -61,7 +71,32 @@ void add_message(int color, const char* message)
         _add_message(color, strndup(message + len, i));
         len += i + offset;
     }
-    _add_message(color, strdup(message + len));
+    fprintf(stderr, "Message (%ld/%ld) %s\n", len, mlen, message);
+    if(mlen - len <= 0)
+        return;
+    char* nm = 0;
+    if(len != 0) {
+        strncpy(nm, message + len, mlen - len);
+        nm = malloc((mlen - len + 1) * sizeof(char));
+    } else {
+        nm = strdup(message);
+    }
+    _add_message(color, nm);
+}
+
+void printf_message(int color, const char* message, ...)
+{
+	va_list args;
+	va_start(args, message);
+    int length = vsnprintf(0, 0, message, args);
+    va_end(args);
+    ++length;
+    char* mess = calloc(length, sizeof(char));
+	va_start(args, message);
+    vsnprintf(mess, length, message, args);
+    va_end(args);
+    add_message(color, mess);
+    free(mess);
 }
 
 void draw_log()
@@ -112,7 +147,7 @@ void log_scroll(bool up)
 
 bool ask_question(int color, const char* message)
 {
-    char* m = calloc(strlen(message + 8), sizeof(char));
+    char* m = calloc(strlen(message) + 8, sizeof(char));
     strcpy(m, message);
     strcat(m, " (y/n)");
     add_message(color, m);
