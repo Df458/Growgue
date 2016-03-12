@@ -1,4 +1,6 @@
 <item>
     <display color="selected" char="o" name="Onion"/>
     <script id="data/onion.lua"/>
+    <stats slot="head" str="10"/>
+    <plant id="data/test.plant"/>
 </item>

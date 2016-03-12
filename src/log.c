@@ -71,17 +71,7 @@ void add_message(int color, const char* message)
         _add_message(color, strndup(message + len, i));
         len += i + offset;
     }
-    fprintf(stderr, "Message (%ld/%ld) %s\n", len, mlen, message);
-    if(mlen - len <= 0)
-        return;
-    char* nm = 0;
-    if(len != 0) {
-        strncpy(nm, message + len, mlen - len);
-        nm = malloc((mlen - len + 1) * sizeof(char));
-    } else {
-        nm = strdup(message);
-    }
-    _add_message(color, nm);
+    _add_message(color, strdup(message + len));
 }
 
 void printf_message(int color, const char* message, ...)

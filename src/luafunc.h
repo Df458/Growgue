@@ -3,6 +3,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <stdbool.h>
 
 bool callback(const char* name, lua_State* state);
 

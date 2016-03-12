@@ -47,9 +47,14 @@ void init_game()
     init_items();
     test_map = create_map(80, 24, GEN_WALK);
     init_player(map_win, stats_win, hp_win, test_map);
-    spawn_actor(47, 15, "data/test.actor", test_map);
-    spawn_item(1, 1, "data/test.item", test_map);
-    draw_map(0, 0, test_map);
+    int x, y;
+    get_random_empty_tile(&x, &y, test_map);
+    spawn_actor(x, y, "data/test.actor", test_map);
+    get_random_empty_tile(&x, &y, test_map);
+    spawn_item(x, y, "data/test.item", test_map);
+    get_random_empty_tile(&x, &y, test_map);
+    player_set_position(x, y);
+    draw_map(x, y, test_map);
     draw_log();
 }
 

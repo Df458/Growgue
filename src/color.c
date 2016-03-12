@@ -51,7 +51,7 @@ void set_hicolor(bool hi)
             init_color(COLOR_YELLOW, 1000, 1000, 0);
             init_color(COLOR_BLUE, 0, 0, 1000);
             init_color(COLOR_RED, 1000, 0, 0);
-            init_color(COLOR_BROWN, 500, 500, 0);
+            init_color(COLOR_BROWN, 600, 400, 0);
         }
         init_pair(YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
         init_pair(GREEN_BLACK, COLOR_GREEN, COLOR_BLACK);

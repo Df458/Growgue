@@ -2,6 +2,7 @@
 #define TILE_H
 #include "actor.h"
 #include "item.h"
+#include "plant.h"
 
 typedef struct tile
 {
@@ -16,8 +17,12 @@ typedef struct tile
 
     bool can_till;
     bool tilled;
+    float water;
+    float nutrients;
+    float minerals;
 
     actor* actor_ref;
+    plant* plant_ref;
     item** item_list;
     int item_count;
 }

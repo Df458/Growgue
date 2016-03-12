@@ -3,14 +3,25 @@
 #include <curses.h>
 #include "map.h"
 
-enum item_purpose {
+enum item_purpose
+{
     PURPOSE_NONE = -1,
     PURPOSE_PICKUP,
     PURPOSE_DROP,
     PURPOSE_APPLY,
     PURPOSE_PLANT,
     PURPOSE_EQUIP,
+    PURPOSE_REMOVE,
     PURPOSE_COUNT
+};
+
+enum equipment_slot
+{
+    SLOT_INVALID = -1,
+    SLOT_HEAD,
+    SLOT_BODY,
+    SLOT_WEAPON,
+    SLOT_COUNT
 };
 
 void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, map* start_map);
@@ -18,6 +29,7 @@ void update_player();
 void draw_player(int x, int y);
 void cleanup_player();
 void player_get_position(int* px, int* py);
+void player_set_position(int px, int py);
 void player_move(int direction);
 void player_act();
 int damage_player(int damage);

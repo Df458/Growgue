@@ -3,6 +3,7 @@
 #include "color.h"
 #include "log.h"
 #include "luafunc.h"
+#include "plant.h"
 #include "player.h"
 #include "macro.h"
 #include "map.h"
@@ -32,7 +33,7 @@ map* create_map(int width, int height, int gen_type)
 
     for(int i = 0; i < new_map->height; ++i) {
         for(int j = 0; j < new_map->width; ++j) {
-            new_map->tiles[i * new_map->width + j].display = '#';
+            new_map->tiles[i * new_map->width + j].display = rand() % 3 ? 219 : 178;
             new_map->tiles[i * new_map->width + j].color = 0;
             new_map->tiles[i * new_map->width + j].solid = true;
             new_map->tiles[i * new_map->width + j].actor_ref = 0;
@@ -42,11 +43,14 @@ map* create_map(int width, int height, int gen_type)
             new_map->tiles[i * new_map->width + j].tilled = false;
             new_map->tiles[i * new_map->width + j].item_count = 0;
             new_map->tiles[i * new_map->width + j].item_list = 0;
+            new_map->tiles[i * new_map->width + j].water = 0;
+            new_map->tiles[i * new_map->width + j].nutrients = 0;
+            new_map->tiles[i * new_map->width + j].minerals = 0;
+            new_map->tiles[i * new_map->width + j].plant_ref = 0;
         }
     }
     switch(gen_type) {
         case GEN_WALK: {
-            // TODO: Drunkard's walk
             int tilecount = width * height * 0.6 + (rand() % width - (width * 0.5));
             int i = 0;
             int cx[3];
@@ -60,8 +64,13 @@ map* create_map(int width, int height, int gen_type)
             while(tilecount > 0 && i < tilecount * 10) {
                 for(int j = 0; j < 3; ++j) {
                     int index = cy[j] * width + cx[j];
-                    if(new_map->tiles[index].display == '#')
+                    if(new_map->tiles[index].solid == true)
                         tilecount--;
+                    if(new_map->tiles[index].solid == false && !rand() % 3) {
+                        cx[j] = rand() % (width - 2) + 1;
+                        cy[j] = rand() % (width - 2) + 1;
+                        index = cy[j] * width + cx[j];
+                    }
                     new_map->tiles[index].display = '.';
                     new_map->tiles[index].color = 0;
                     new_map->tiles[index].solid = false;
@@ -84,16 +93,12 @@ map* create_map(int width, int height, int gen_type)
     int patch_count = rand() % 8 + 2;
     for(int i = 0; i < patch_count; ++i) {
         int cx, cy;
-
-        do {
-            cx = rand() % (width - 2) + 1;
-            cy = rand() % (height - 2) + 1;
-        } while(new_map->tiles[cy * width + cx].solid == true);
+        get_random_empty_tile(&cx, &cy, new_map);
 
         int size = rand() % 5 + 1;
         for(int j = clamp(cy - size, 1, height - 2); j < clamp(cy + size, 1, height - 2); ++j) {
-            for(int k = clamp(cy - size, 1, width - 2); k < clamp(cy + size, 1, width - 2); ++k) {
-                new_map->tiles[j * width + k].display = '.';
+            for(int k = clamp(cx - size, 1, width - 2); k < clamp(cx + size, 1, width - 2); ++k) {
+                new_map->tiles[j * width + k].display = rand() % 2 ? '.' : ',';
                 new_map->tiles[j * width + k].color = COLOR_SOIL;
                 new_map->tiles[j * width + k].solid = false;
                 new_map->tiles[j * width + k].can_till = true;
@@ -117,6 +122,15 @@ void update_map(int delta, map* to_update)
             to_update->tiles[to_update->actors[i]->y * to_update->width + to_update->actors[i]->x].actor_ref = 0;
             kill_actor(to_update->actors[i]);
             to_update->actors[i] = 0;
+        }
+    }
+    for(int i = 0; i < to_update->height; ++i) {
+        for(int j = 0; j < to_update->width; ++j) {
+            if(to_update->tiles[i * to_update->width + j].plant_ref) {
+                update_plant(to_update->tiles[i * to_update->width + j].plant_ref, delta);
+                if(to_update->tiles[i * to_update->width + j].plant_ref->dead)
+                    kill_plant(to_update->tiles[i * to_update->width + j].plant_ref);
+            }
         }
     }
     draw_map(x, y, to_update);
@@ -154,6 +168,9 @@ void draw_map(int x, int y, map* to_draw)
             if(to_draw->tiles[i * to_draw->width + j].actor_ref) {
                 set_color(map_win, to_draw->tiles[i * to_draw->width + j].actor_ref->color);
                 waddch(map_win, to_draw->tiles[i * to_draw->width + j].actor_ref->display);
+            } else if(to_draw->tiles[i * to_draw->width + j].plant_ref) {
+                set_color(map_win, to_draw->tiles[i * to_draw->width + j].plant_ref->color);
+                waddch(map_win, to_draw->tiles[i * to_draw->width + j].plant_ref->display);
             } else {
                 int k;
                 for(k = 0; k < to_draw->tiles[i * to_draw->width + j].item_count; ++k)
@@ -229,6 +246,38 @@ bool spawn_item(int x, int y, const char* file, map* to_spawn)
         place_item(x, y, it, to_spawn);
     }
     return false;
+}
+
+bool spawn_plant(int x, int y, const char* file, map* to_spawn)
+{
+    plant* it = create_plant(file, x, y, to_spawn);
+    if(!it) {
+        fprintf(stderr, "Couldn't spawn plant");
+        return false;
+    }
+    to_spawn->tiles[y * to_spawn->width + x].plant_ref = it;
+    return true;
+}
+
+bool can_plant(int x, int y, map* cmap, bool explain)
+{
+    int id = y * cmap->width + x;
+    if(!cmap->tiles[id].can_till) {
+        if(explain)
+            add_message(COLOR_WARNING, "There's no soil for planting here!");
+        return false;
+    }
+    if(!cmap->tiles[id].tilled) {
+        if(explain)
+            add_message(COLOR_WARNING, "The soil here needs to be tilled.");
+        return false;
+    }
+    if(cmap->tiles[id].plant_ref) {
+        if(explain)
+            add_message(COLOR_WARNING, "There's already a plant here!");
+        return false;
+    }
+    return true;
 }
 
 struct coord_pair { int x; int y; };
@@ -315,7 +364,7 @@ void till(int x, int y, map* cmap)
         return;
     }
     cmap->tiles[id].tilled = true;
-    cmap->tiles[id].display = '=';
+    cmap->tiles[id].display = 247;
     add_message(COLOR_DEFAULT, "You till the soil.");
 }
 
@@ -358,6 +407,29 @@ void take_item(int x, int y, item* it, map* cmap)
     }
 }
 
+item* harvest_plant(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+    if(!cmap->tiles[id].plant_ref) {
+        add_message(COLOR_WARNING, "There's no plant to harvest here!");
+        return 0;
+    }
+    if(!cmap->tiles[id].plant_ref->can_harvest) {
+        add_message(COLOR_WARNING, "This plant can't be harvested!");
+        return 0;
+    }
+    if(cmap->tiles[id].plant_ref->growth_time > 0) {
+        add_message(COLOR_WARNING, "This plant isn't ready for harvest yet!");
+        return 0;
+    }
+    item* it = create_item(cmap->tiles[id].plant_ref->item_id);
+    if(it) {
+        it->count = cmap->tiles[id].plant_ref->item_count;
+    }
+    kill_plant(cmap->tiles[id].plant_ref);
+    return it;
+}
+
 void describe_ground(int x, int y, map* cmap)
 {
     int id = y * cmap->width + x;
@@ -369,6 +441,12 @@ void describe_ground(int x, int y, map* cmap)
             printf_message(COLOR_DEFAULT, "You see %d %s on the ground here", t->item_list[i]->count, t->item_list[i]->name);
             callback("step", t->item_list[i]->script_state);
         }
+    }
+    if(t->plant_ref) {
+        printf_message(COLOR_DEFAULT, "There is a %s planted here", t->plant_ref->name);
+        if(t->plant_ref->can_harvest && t->plant_ref->growth_time <= 0)
+            printf_message(COLOR_DEFAULT, "It's ready for harvest");
+        callback("step", t->plant_ref->script_state);
     }
 }
 
@@ -382,4 +460,45 @@ int item_count_at(int x, int y, map* cmap)
 {
     int id = y * cmap->width + x;
     return cmap->tiles[id].item_count;
+}
+
+void water_tile(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+
+    cmap->tiles[id].water = 100;
+    if(!cmap->tiles[id].can_till)
+        add_message(COLOR_DEFAULT, "You pour water on the ground");
+    else if(cmap->tiles[id].plant_ref)
+        add_message(COLOR_DEFAULT, "You water the plant");
+    else
+        add_message(COLOR_DEFAULT, "You water the soil");
+}
+
+void get_random_empty_tile(int* x, int* y, map* cmap)
+{
+    int cx, cy;
+
+    do {
+        cx = rand() % (cmap->width - 2) + 1;
+        cy = rand() % (cmap->height - 2) + 1;
+    } while(cmap->tiles[cy * cmap->width + cx].solid == true);
+    *x = cx;
+    *y = cy;
+}
+
+void get_tile_growth_info(int x, int y, float* w, float* n, float* m, map* cmap)
+{
+    int index = y * cmap->width + x;
+    *w = cmap->tiles[index].water;
+    *n = cmap->tiles[index].nutrients;
+    *m = cmap->tiles[index].minerals;
+}
+
+void update_tile_growth_info(int x, int y, float w, float n, float m, map* cmap)
+{
+    int index = y * cmap->width + x;
+    cmap->tiles[index].water -= w;
+    cmap->tiles[index].nutrients -= n;
+    cmap->tiles[index].minerals -= m;
 }

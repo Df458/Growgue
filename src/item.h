@@ -18,6 +18,7 @@ typedef struct item
     bool can_plant;
 
     // Stats for equipment
+    int slot;
     int str;
     int def;
 
@@ -26,6 +27,7 @@ typedef struct item
     int color;
 
     char* orig_path;
+    char* plant_id;
 
     lua_State* script_state;
 }

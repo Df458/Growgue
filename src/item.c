@@ -14,6 +14,16 @@
 static WINDOW* inv_win = 0;
 static PANEL* inv_panel   = 0;
 
+const char* purpose_list[] = 
+{
+    "Pick up an item",
+    "Drop an item",
+    "Apply an item",
+    "Plant an item",
+    "Equip an item",
+    "Remove an item",
+};
+
 void init_items()
 {
     int rows, cols;
@@ -59,9 +69,13 @@ item* create_item(const char* file)
     it->name = strdup("Item");
     it->count = 1;
     it->can_equip = false;
+    it->can_use = false;
+    it->can_plant = false;
     it->str = 0;
     it->def = 0;
+    it->slot = -1;
     it->orig_path = strdup(file);
+    it->plant_id = 0;
 
     xmlChar* a = 0;
     for(xmlNodePtr node = root->children; node; node = node->next) {
@@ -84,6 +98,16 @@ item* create_item(const char* file)
         }
         if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"stats")) {
             it->can_equip = true;
+            if((a = xmlGetProp(node, (const xmlChar*)"slot"))) {
+                if(!strcmp((char*)a, "head"))
+                    it->slot = SLOT_HEAD;
+                else if(!strcmp((char*)a, "body"))
+                    it->slot = SLOT_BODY;
+                else if(!strcmp((char*)a, "weapon"))
+                    it->slot = SLOT_WEAPON;
+                free(a);
+                a = 0;
+            }
             if((a = xmlGetProp(node, (const xmlChar*)"str"))) {
                 it->str = atoi((char*)a);
                 free(a);
@@ -107,6 +131,14 @@ item* create_item(const char* file)
                     lua_pop(it->script_state, 1);
                 }
                 free(path);
+                free(a);
+                a = 0;
+            }
+        }
+        if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"plant")) {
+            if((a = xmlGetProp(node, (const xmlChar*)"id"))) {
+                it->plant_id = strdup((char*)a);
+                it->can_plant = true;
                 free(a);
                 a = 0;
             }
@@ -146,7 +178,7 @@ item* get_item(item** item_list, int item_count, int purpose, bool auto_select)
     item*  found_item = 0;
 
     for(int i = 0; i < item_count; ++i) {
-        if(item_list[i]) {
+        if(item_list[i] && (purpose != PURPOSE_EQUIP || item_list[i]->can_equip) && (purpose != PURPOSE_APPLY || item_list[i]->can_use) && (purpose != PURPOSE_PLANT || item_list[i]->can_plant)) {
             if(temp_used >= temp_count) {
                 temp_count += 5;
                 temp_list = realloc(temp_list, sizeof(item*) * temp_count);
@@ -168,13 +200,12 @@ item* get_item(item** item_list, int item_count, int purpose, bool auto_select)
     update_panels();
     doupdate();
 
-    // TODO: Bring up a list of viable items and display the inventory
-    //       Browse until an item is found or cancelled
     bool should_continue = true;
     int selected = 0;
     while(should_continue) {
         set_color(inv_win, COLOR_DEFAULT);
         wborder(inv_win, 179, 179, 196, 196, 218, 191, 218, 217);
+        mvwaddstr(inv_win, 0, 1, purpose_list[purpose]);
         for(int i = 0; i < temp_used; ++i) {
             set_color(inv_win, COLOR_DEFAULT);
             if(i == selected)
@@ -184,11 +215,18 @@ item* get_item(item** item_list, int item_count, int purpose, bool auto_select)
         wrefresh(inv_win);
         switch(get_action()) {
             case ACTION_INVALID:
-                // TODO: Get direction
+                if(get_last_direction() == DIRECTION_NORTH && selected > 0)
+                    --selected;
+                else if(get_last_direction() == DIRECTION_SOUTH && selected < temp_used - 1)
+                    ++selected;
                 break;
             case ACTION_SELECT:
                 should_continue = false;
                 found_item = temp_list[selected];
+                break;
+            case ACTION_QUIT:
+                should_continue = false;
+                found_item = 0;
                 break;
             // TODO: Add scrolling
         }

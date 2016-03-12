@@ -17,6 +17,8 @@ static int ep_max = 0;
 static int str = 0;
 static int def = 0;
 
+static item* equipment[3] = { 0 };
+
 static int hp_current;
 static int ep_current;
 
@@ -26,6 +28,8 @@ static int y = 0;
 static map* current_map = 0;
 static item** inventory = 0;
 static int item_count = 0;
+
+const char* slot_names[SLOT_COUNT] = { "Head", "Body", "Hands" };
 
 void init_stats()
 {
@@ -131,6 +135,12 @@ void player_get_position(int* px, int* py)
     *py = y;
 }
 
+void player_set_position(int px, int py)
+{
+    x = px;
+    y = py;
+}
+
 void player_move(int direction)
 {
     int dx = 0;
@@ -179,7 +189,11 @@ void player_move(int direction)
             describe_ground(x, y, current_map);
     } else if(res == 2) {
         actor* act = get_actor_at(x + dx, y + dy, current_map);
-        int dmg = damage_actor(act, str);
+        int astr = str;
+        for(int i = 0; i < SLOT_COUNT; ++i)
+            if(equipment[i])
+                astr += equipment[i]->str;
+        int dmg = damage_actor(act, astr);
         char* damage_text = 0;
         if(dmg > 0) {
             int len = snprintf(0, 0, "You hit the %s for %d damage", act->name, dmg);
@@ -214,6 +228,11 @@ void player_act()
             item* it = get_item(inventory, item_count, PURPOSE_DROP, false);
             if(!it)
                 break;
+            if(it->can_equip && equipment[it->slot] == it) {
+                equipment[it->slot] = 0;
+                printf_message(COLOR_DEFAULT, "You unequip the %s, and drop it on the ground.", it->name);
+                callback("removed", it->script_state);
+            }
             item* clone = clone_item(it);
             place_item(x, y, clone, current_map);
             callback("dropped", clone->script_state);
@@ -224,7 +243,41 @@ void player_act()
             if(!it)
                 break;
             callback("apply", it->script_state);
+            remove_item(it, 1);
         } break;
+        case ACTION_EQUIP: {
+            item* it = get_item(inventory, 3, PURPOSE_EQUIP, false);
+            if(!it || it->slot == SLOT_INVALID)
+                break;
+            callback("equip", it->script_state);
+            printf_message(COLOR_DEFAULT, "You equip the %s.", it->name);
+            equipment[it->slot] = it;
+        break; }
+        case ACTION_REMOVE: {
+            item* it = get_item(equipment, 3, PURPOSE_REMOVE, false);
+            if(!it)
+                break;
+            callback("remove", it->script_state);
+            equipment[it->slot] = 0;
+            printf_message(COLOR_DEFAULT, "You unequip the %s.", it->name);
+        break; }
+        case ACTION_PLANT: {
+            if(!can_plant(x, y, current_map, true))
+                break;
+            item* it = get_item(inventory, item_count, PURPOSE_PLANT, false);
+            if(!it)
+                break;
+            if(spawn_plant(x, y, it->plant_id, current_map)) {
+                printf_message(COLOR_DEFAULT, "You plant the %s in the tilled soil.", it->name);
+                remove_item(it, 1);
+            }
+        break; }
+        case ACTION_HARVEST: {
+            add_item(harvest_plant(x, y, current_map));
+        break; }
+        case ACTION_WATER:
+            water_tile(x, y, current_map);
+            break;
     }
     if(ep_current <= 0)
         add_message(COLOR_EP_CRIT, "Out of energy, you fall to the ground.");
@@ -232,8 +285,12 @@ void player_act()
 
 int damage_player(int damage)
 {
-    hp_current -= damage - def;
-    return damage - def;
+    int adef = def;
+    for(int i = 0; i < SLOT_COUNT; ++i)
+        if(equipment[i])
+            adef += equipment[i]->def;
+    hp_current -= damage - adef;
+    return damage - adef;
 }
 
 bool is_dead()

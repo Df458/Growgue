@@ -111,6 +111,22 @@ int get_input()
             last_input_action = ACTION_APPLY;
             last_input_type = INPUT_ACTION;
             break;
+        case 'w':
+            last_input_action = ACTION_WATER;
+            last_input_type = INPUT_ACTION;
+            break;
+        case 'e':
+            last_input_action = ACTION_EQUIP;
+            last_input_type = INPUT_ACTION;
+            break;
+        case 'r':
+            last_input_action = ACTION_REMOVE;
+            last_input_type = INPUT_ACTION;
+            break;
+        case 'v':
+            last_input_action = ACTION_HARVEST;
+            last_input_type = INPUT_ACTION;
+            break;
     }
     }
 
