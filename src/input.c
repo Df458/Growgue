@@ -14,24 +14,28 @@ int get_input()
         { // DIRECTION INPUTS
         case 'h':
         case '4':
+        case KEY_LEFT:
             last_input_direction = DIRECTION_WEST;
             last_input_type = INPUT_DIRECTIONAL;
             break;
 
         case 'j':
         case '2':
+        case KEY_DOWN:
             last_input_direction = DIRECTION_SOUTH;
             last_input_type = INPUT_DIRECTIONAL;
             break;
 
         case 'k':
         case '8':
+        case KEY_UP:
             last_input_direction = DIRECTION_NORTH;
             last_input_type = INPUT_DIRECTIONAL;
             break;
 
         case 'l':
         case '6':
+        case KEY_RIGHT:
             last_input_direction = DIRECTION_EAST;
             last_input_type = INPUT_DIRECTIONAL;
             break;
@@ -125,6 +129,10 @@ int get_input()
             break;
         case 'v':
             last_input_action = ACTION_HARVEST;
+            last_input_type = INPUT_ACTION;
+            break;
+        case '?':
+            last_input_action = ACTION_HELP;
             last_input_type = INPUT_ACTION;
             break;
     }

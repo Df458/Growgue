@@ -42,6 +42,7 @@ enum input_actions {
     ACTION_EQUIP,
     ACTION_REMOVE,
     ACTION_HARVEST,
+    ACTION_HELP,
     ACTION_COUNT,
 };
 

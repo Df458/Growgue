@@ -5,6 +5,7 @@
 
 #include "actor.h"
 #include "color.h"
+#include "controls.h"
 #include "item.h"
 #include "input.h"
 #include "log.h"
@@ -166,6 +167,9 @@ int main(int argc, char* argv[])
                             hide_menu();
                             game_state = STATE_GAME;
                             init_game();
+                            break;
+                        case SELECTION_CONTROLS:
+                            show_controls();
                             break;
                         case SELECTION_QUIT:
                             should_continue = false;

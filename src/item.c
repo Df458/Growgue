@@ -204,7 +204,7 @@ item* get_item(item** item_list, int item_count, int purpose, bool auto_select)
     int selected = 0;
     while(should_continue) {
         set_color(inv_win, COLOR_DEFAULT);
-        wborder(inv_win, 179, 179, 196, 196, 218, 191, 218, 217);
+        wborder(inv_win, 179, 179, 196, 196, 218, 191, 192, 217);
         mvwaddstr(inv_win, 0, 1, purpose_list[purpose]);
         for(int i = 0; i < temp_used; ++i) {
             set_color(inv_win, COLOR_DEFAULT);

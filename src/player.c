@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "color.h"
+#include "controls.h"
 #include "input.h"
 #include "log.h"
 #include "luafunc.h"
@@ -275,6 +276,9 @@ void player_act()
         case ACTION_HARVEST: {
             add_item(harvest_plant(x, y, current_map));
         break; }
+        case ACTION_HELP:
+            show_controls();
+            break;
         case ACTION_WATER:
             water_tile(x, y, current_map);
             break;
