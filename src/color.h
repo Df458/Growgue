@@ -1,7 +1,10 @@
 #ifndef COLOR_H
 #define COLOR_H
-#include <stdbool.h>
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
 #include <curses.h>
+#endif
 
 enum pair_ids {
     COLOR_DEFAULT = 0,

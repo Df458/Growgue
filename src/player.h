@@ -1,6 +1,10 @@
 #ifndef PLAYER_H
 #define PLAYER_H
-#include <curses.h>
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
+// #include <curses.h>
+#endif
 #include "map.h"
 
 enum item_purpose
@@ -39,13 +43,17 @@ void remove_item(item* item, int quantity);
 int get_current_floor();
 void set_current_map(map* map, bool down, bool up);
 void add_xp(int xp);
+WINDOW* get_map_window();
 
 void insert_player_into_lua(lua_State* state);
 int lua_player_index(lua_State* state);
 int lua_player_newindex(lua_State* state);
 
+int lua_fertilize(lua_State* state);
+
 static const luaL_Reg player_funcs[] =
 {
+    {"fertilize", lua_fertilize},
     {0, 0}
 };
 

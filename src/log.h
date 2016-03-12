@@ -1,6 +1,10 @@
 #ifndef LOG_H
 #define LOG_H
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
 #include <curses.h>
+#endif
 
 void init_log(WINDOW* log);
 void cleanup_log();

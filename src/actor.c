@@ -1,3 +1,5 @@
+#define true TRUE
+#define false FALSE
 #include <string.h>
 
 #include "actor.h"

@@ -1,6 +1,10 @@
 #ifndef REQS_H
 #define REGQS_H
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
 #include <curses.h>
+#endif
 
 #define MIN_W 90
 #define MIN_H 35

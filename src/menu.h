@@ -1,6 +1,6 @@
 #ifndef MENU_H
 #define MENU_H
-#include <stdbool.h>
+// #include <stdbool.h>
 
 enum menu_selection {
     SELECTION_INVALID = -1,

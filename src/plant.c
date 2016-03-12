@@ -1,3 +1,5 @@
+#define true TRUE
+#define false FALSE
 #include <string.h>
 #include <stdlib.h>
 
@@ -40,6 +42,9 @@ plant* create_plant(const char* file, int x, int y, map* ref)
     pl->can_harvest = false;
     pl->item_id = 0;
     pl->item_count = 0;
+    pl->water_need= 0;
+    pl->nutrient_need = 0;
+    pl->mineral_need = 0;
     pl->x = x;
     pl->y = y;
     pl->map_ref = ref;

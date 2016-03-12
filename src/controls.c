@@ -1,5 +1,12 @@
+#define true TRUE
+#define false FALSE
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#include <xcurses/panel.h>
+#else
 #include <curses.h>
 #include <panel.h>
+#endif
 #include "color.h"
 #include "controls.h"
 #include "input.h"

@@ -3,7 +3,11 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include <stdbool.h>
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
+#include <curses.h>
+#endif
 
 bool callback(const char* name, lua_State* state);
 

@@ -25,7 +25,7 @@ CFLAGS=-Wall -Werror -Wno-unused-but-set-variable -D BUILD_TYPE=$(BUILDTYPE) -D 
 CLIBS=-l$(CURSES) `$(PKGCONFIG) --libs lua, libxml-2.0`
 
 ifeq ($(CURSES), pdcurses)
-	CFLAGS += -D PDCURSES `$(PKGCONFIG) --cflags sdl`
+	CFLAGS += -D PDCURSES -DNCURSES_MOUSE_VERSION `$(PKGCONFIG) --cflags sdl` -I/usr/include/xcurses
 	CLIBS += `$(PKGCONFIG) --libs sdl`
 else ifeq ($(CURSES), ncurses)
 	CLIBS += -lpanel

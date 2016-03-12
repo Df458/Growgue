@@ -1,4 +1,8 @@
-#include <curses.h>
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
+/* #include <curses.h> */
+#endif
 #include <string.h>
 #include "color.h"
 

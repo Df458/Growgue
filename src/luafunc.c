@@ -1,3 +1,5 @@
+#define true TRUE
+#define false FALSE
 #include <stdlib.h>
 #include <string.h>
 #include "color.h"

@@ -3,7 +3,11 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include <stdbool.h>
+#ifdef PDCURSES
+#include <xcurses/panel.h>
+#else
+#include <panel.h>
+#endif
 
 typedef struct actor
 {

@@ -1,3 +1,5 @@
+#define true TRUE
+#define false FALSE
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -59,8 +61,8 @@ void add_message(int color, const char* message)
     ssize_t mlen = strlen(message);
     ssize_t len = 0;
     while(mlen - len > LOG_WIDTH) {
-        uint16_t i = LOG_WIDTH;
-        uint16_t offset = 0;
+        int i = LOG_WIDTH;
+        int offset = 0;
         for(i = LOG_WIDTH; i >= 0; --i)
             if(message[len + i] == ' ')
                 break;

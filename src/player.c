@@ -1,3 +1,5 @@
+#define true TRUE
+#define false FALSE
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +35,8 @@ static int ep_current;
 
 static int x = 0;
 static int y = 0;
+static int pres_x = 0;
+static int pres_y = 0;
 static int z = 0;
 
 static map* current_map = 0;
@@ -67,7 +71,7 @@ void init_player(WINDOW* mapw, WINDOW* stats, WINDOW* hp, WINDOW* area, WINDOW* 
     current_map = start_map;
 }
 
-void draw_player(int x, int y)
+void draw_player(int py, int px)
 {
     wborder(hp_win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
     if(hp_current > 0) {
@@ -121,8 +125,10 @@ void draw_player(int x, int y)
     mvwprintw(stats_win, 3, 0, "STR: %-4d", str);
     mvwprintw(stats_win, 4, 0, "DEF: %-4d", def);
 
-    move(x, y);
-    mvwaddch(map_win, x, y, '@');
+    move(px, py);
+    mvwaddch(map_win, py, px, '@');
+    pres_x = px;
+    pres_y = py;
     mvwprintw(map_win, 23, 2, "LEVEL: %d", level);
     mvwprintw(map_win, 23, 12, "DLEVEL: %02d", z);
 
@@ -317,6 +323,15 @@ void player_act()
         case ACTION_WATER:
             water_tile(x, y, current_map);
             break;
+        case ACTION_EXAMINE: {
+            int mx, my;
+            get_last_mouse_position(&mx, &my);
+            int xdiff = mx - pres_x;
+            int ydiff = my - pres_y;
+            if(mx < 1 || my < 1 || mx > 78 || my > 78)
+                break;
+            examine(x + xdiff, y +ydiff, current_map);
+        } break;
     }
     if(ep_current <= 0)
         add_message(COLOR_EP_CRIT, "Out of energy, you fall to the ground.");
@@ -380,6 +395,42 @@ void remove_item(item* item, int quantity)
     }
 }
 
+int get_current_floor()
+{
+    return z;
+}
+
+void set_current_map(map* map, bool down, bool up)
+{
+    current_map = map;
+    if(down) {
+        x = current_map->us_x;
+        y = current_map->us_y;
+    } else if(up) {
+        x = current_map->ds_x;
+        y = current_map->ds_y;
+    }
+}
+
+void add_xp(int new_xp)
+{
+    xp += new_xp;
+
+    if(xp >= next) {
+        level += 1;
+        next = 25 + (20 * level) + (5 * pow((level + 1) / 2, 2));
+        hp_max += 50;
+        ep_max += 50;
+        hp_current += 50;
+        ep_current += 50;
+    }
+}
+
+WINDOW* get_map_window()
+{
+    return map_win;
+}
+
 int lua_player_index(lua_State* state)
 {
     const char* index = lua_tostring(state, 2);
@@ -419,29 +470,8 @@ void insert_player_into_lua(lua_State* state)
     lua_setglobal(state, "player");
 }
 
-int get_current_floor()
+int lua_fertilize(lua_State* state)
 {
-    return z;
-}
-
-void set_current_map(map* map, bool down, bool up)
-{
-    current_map = map;
-    if(down) {
-        x = current_map->us_x;
-        y = current_map->us_y;
-    } else if(up) {
-        x = current_map->ds_x;
-        y = current_map->ds_y;
-    }
-}
-
-void add_xp(int new_xp)
-{
-    xp += new_xp;
-
-    if(xp >= next) {
-        level += 1;
-        next = 25 + (20 * level) + (5 * pow((level + 1) / 2, 2));
-    }
+    current_map->tiles[y * current_map->width + x].nutrients = 100;
+    return 0;
 }

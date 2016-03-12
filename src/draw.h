@@ -1,6 +1,10 @@
 #ifndef DRAW_H
 #define DRAW_H
-#include <curses.h>
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
+// #include <curses.h>
+#endif
 
 enum alignment
 {

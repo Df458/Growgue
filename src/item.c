@@ -1,4 +1,10 @@
+#define true TRUE
+#define false FALSE
+#ifdef PDCURSES
+#include <xcurses/panel.h>
+#else
 #include <panel.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 
@@ -133,6 +139,9 @@ item* create_item(const char* file)
                 free(path);
                 free(a);
                 a = 0;
+                lua_getglobal(it->script_state, "apply");
+                it->can_use = lua_isfunction(it->script_state, -1);
+                lua_pop(it->script_state, 1);
             }
         }
         if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"plant")) {

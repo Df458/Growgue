@@ -1,15 +1,24 @@
-#include <curses.h>
 #include "input.h"
 
 static int last_input_type = INPUT_INVALID;
 static int last_input_direction = DIRECTION_INVALID;
 static int last_input_action = ACTION_INVALID;
+static MEVENT mouse;
 
-int get_input()
+void init_input()
+{
+    mousemask(BUTTON3_RELEASED | BUTTON3_CLICKED, 0);
+}
+
+int get_input(WINDOW* win)
 {
     last_input_type = INPUT_INVALID;
 
-    int res = getch();
+    int res;
+    if(win)
+        res = wgetch(win);
+    else
+        res = getch();
     switch(res) {
         { // DIRECTION INPUTS
         case 'h':
@@ -135,23 +144,31 @@ int get_input()
             last_input_action = ACTION_HELP;
             last_input_type = INPUT_ACTION;
             break;
+        case KEY_MOUSE:
+            if(getmouse(&mouse) == OK  && (mouse.bstate & BUTTON3_RELEASED || mouse.bstate & BUTTON3_CLICKED)) {
+                last_input_type = INPUT_ACTION;
+                last_input_action = ACTION_EXAMINE;
+            } else {
+                last_input_type = INPUT_INVALID;
+            }
+            break;
     }
     }
 
     return last_input_type;
 }
 
-int get_direction()
+int get_direction(WINDOW* win)
 {
-    int res = get_input();
+    int res = get_input(win);
     if(res != INPUT_DIRECTIONAL)
         return ACTION_INVALID;
     return get_last_direction();
 }
 
-int get_action()
+int get_action(WINDOW* win)
 {
-    int res = get_input();
+    int res = get_input(win);
     if(res != INPUT_ACTION)
         return ACTION_INVALID;
     return get_last_action();
@@ -170,4 +187,10 @@ int get_last_direction()
 int get_last_action()
 {
     return last_input_action;
+}
+
+void get_last_mouse_position(int* x, int* y)
+{
+    *x = mouse.x;
+    *y = mouse.y;
 }

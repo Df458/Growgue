@@ -1,4 +1,10 @@
+#define true TRUE
+#define false FALSE
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
 #include <curses.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -54,6 +60,7 @@ void init_game()
     spawn_actor(x, y, "data/test.actor", world[0]);
     get_random_empty_tile(&x, &y, world[0]);
     spawn_item(x, y, "data/test.item", world[0]);
+    spawn_item(x + 2, y + 2, "data/fertilizer.item", world[0]);
     get_random_empty_tile(&x, &y, world[0]);
     player_set_position(x, y);
     draw_map(x, y, world[0]);
@@ -62,7 +69,7 @@ void init_game()
 
 bool update_game()
 {
-    int in = get_input();
+    int in = get_input(get_map_window());
     if(in == INPUT_ACTION && get_last_action() == ACTION_QUIT)
         return false;
     else if(in == INPUT_ACTION && (get_last_action() == ACTION_SCROLL_UP || get_last_action() == ACTION_SCROLL_DOWN)) {
@@ -154,6 +161,8 @@ int main(int argc, char* argv[])
         fprintf(stderr, "This terminal is too small to play this game!\nRequired dimensions are %dx%d, but got %dx%d\n", MIN_W, MIN_H, cols, rows);
         return 1;
     }
+
+    init_input();
 
     bool should_continue = true;
 

@@ -1,5 +1,10 @@
 #ifndef INPUT_H
 #define INPUT_H
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
+#include <curses.h>
+#endif
 
 enum input_types {
     INPUT_INVALID = -1,
@@ -43,15 +48,19 @@ enum input_actions {
     ACTION_REMOVE,
     ACTION_HARVEST,
     ACTION_HELP,
+    ACTION_EXAMINE,
     ACTION_COUNT,
 };
 
-int get_input();
+void init_input();
+
+int get_input(WINDOW* win);
 int get_direction();
 int get_action();
 
 int get_last_input();
 int get_last_direction();
 int get_last_action();
+void get_last_mouse_position(int* x, int* y);
 
 #endif

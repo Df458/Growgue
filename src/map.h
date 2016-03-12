@@ -1,6 +1,10 @@
 #ifndef MAP_H
 #define MAP_H
-#include <curses.h>
+#ifdef PDCURSES
+#include <xcurses/curses.h>
+#else
+// #include <curses.h>
+#endif
 #include "tile.h"
 
 enum map_gen {
@@ -52,5 +56,8 @@ void get_tile_growth_info(int x, int y, float* w, float* n, float* m, map* cmap)
 void update_tile_growth_info(int x, int y, float w, float n, float m, map* cmap);
 bool is_down_stairs(int x, int y, map* cmap);
 bool is_up_stairs(int x, int y, map* cmap);
+void examine(int x, int y, map* cmap);
+
+int lua_fertilize(lua_State* state);
 
 #endif

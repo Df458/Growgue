@@ -1,3 +1,5 @@
+#define true TRUE
+#define false FALSE
 #include <stdlib.h>
 
 #include "color.h"
@@ -147,6 +149,9 @@ void update_map(int delta, map* to_update)
         for(int j = 0; j < to_update->width; ++j) {
             if(to_update->tiles[i * to_update->width + j].plant_ref) {
                 update_plant(to_update->tiles[i * to_update->width + j].plant_ref, delta);
+                to_update->tiles[i * to_update->width + j].water = clamp(to_update->tiles[i * to_update->width + j].water, 0, 100);
+                to_update->tiles[i * to_update->width + j].nutrients = clamp(to_update->tiles[i * to_update->width + j].nutrients, 0, 100);
+                to_update->tiles[i * to_update->width + j].minerals = clamp(to_update->tiles[i * to_update->width + j].minerals, 0, 100);
                 if(to_update->tiles[i * to_update->width + j].plant_ref->dead)
                     kill_plant(to_update->tiles[i * to_update->width + j].plant_ref);
             }
@@ -441,9 +446,14 @@ item* harvest_plant(int x, int y, map* cmap)
         add_message(COLOR_WARNING, "This plant isn't ready for harvest yet!");
         return 0;
     }
+    printf_message(COLOR_DEFAULT, "You harvest the %s.", cmap->tiles[id].plant_ref->name);
     item* it = create_item(cmap->tiles[id].plant_ref->item_id);
     if(it) {
         it->count = cmap->tiles[id].plant_ref->item_count;
+        if(it->count > 1)
+            printf_message(COLOR_DEFAULT, "You get %d %ss.", it->count, it->name);
+        else
+            printf_message(COLOR_DEFAULT, "You get a %s.", it->name);
     }
     kill_plant(cmap->tiles[id].plant_ref);
     return it;
@@ -530,4 +540,30 @@ bool is_down_stairs(int x, int y, map* cmap)
 bool is_up_stairs(int x, int y, map* cmap)
 {
     return x == cmap->us_x && y == cmap->us_y;
+}
+
+void examine(int x, int y, map* cmap)
+{
+    int id = y * cmap->width + x;
+
+    tile* t = &cmap->tiles[id];
+
+    for(int i = 0; i < t->item_count; ++i) {
+        if(t->item_list[i] != 0) {
+            if(t->item_list[i]->count == 1)
+                printf_message(COLOR_DEFAULT, "There is %d %s on the ground here", t->item_list[i]->count, t->item_list[i]->name);
+            else
+                printf_message(COLOR_DEFAULT, "There are %d %ss on the ground here", t->item_list[i]->count, t->item_list[i]->name);
+        }
+    }
+    if(t->plant_ref) {
+        printf_message(COLOR_DEFAULT, "There is a %s planted here", t->plant_ref->name);
+        if(t->plant_ref->can_harvest && t->plant_ref->growth_time <= 0)
+            printf_message(COLOR_DEFAULT, "It's ready for harvest");
+    }
+    if(t->actor_ref) {
+        printf_message(COLOR_DEFAULT, "There is a %s here", t->actor_ref->name);
+        printf_message(COLOR_DEFAULT, "[HP: %d] [STR: %d] [DEF: %d] %s", t->actor_ref->hp, t->actor_ref->str, t->actor_ref->def, t->actor_ref->aggro ? "Hostile" : "Peaceful");
+    }
+    printf_message(COLOR_DEFAULT, "[Water: %%%d] [Nutrients: %%%d] [Minerals: %%%d]", (int)t->water, (int)t->nutrients, (int)t->minerals);
 }
