@@ -161,16 +161,18 @@ void update_actor(actor* act, struct map* cmap)
     }
 }
 
-void kill_actor(actor* act)
+void kill_actor(actor* act, bool force)
 {
-    lua_getglobal(act->script_state, "kill");
-    if(!lua_isfunction(act->script_state, -1)) {
-        lua_pop(act->script_state, 1);
-    } else {
-        if(lua_pcall(act->script_state, 0, 0, 0)) {
-            const char* err = lua_tostring(act->script_state, -1);
-            add_message(COLOR_WARNING, err);
+    if(!force) {
+        lua_getglobal(act->script_state, "kill");
+        if(!lua_isfunction(act->script_state, -1)) {
             lua_pop(act->script_state, 1);
+        } else {
+            if(lua_pcall(act->script_state, 0, 0, 0)) {
+                const char* err = lua_tostring(act->script_state, -1);
+                add_message(COLOR_WARNING, err);
+                lua_pop(act->script_state, 1);
+            }
         }
     }
     lua_close(act->script_state);

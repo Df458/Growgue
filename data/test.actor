@@ -3,4 +3,7 @@
     <stats hp="25" str="5"/>
     <aggro radius="0"/>
     <script id="data/test.lua"/>
+    <drops>
+        <item id="data/fertilizer.item"/>
+    </drops>
 </actor>

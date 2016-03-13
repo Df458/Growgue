@@ -48,19 +48,15 @@ void init_game()
     init_log(log_win);
     init_map(map_win);
     init_items();
-    /* test_map = create_map(80, 24, GEN_WALK); */
     world = calloc(LEVEL_COUNT, sizeof(map*));
-    world[0] = create_map(78, 22, GEN_WALK, false, true);
+    world[0] = load_map("data/test.map", 78, 22, false, true);
     for(int i = 1; i < LEVEL_COUNT - 1; ++i)
         world[i] = create_map(80 + 10 * (i - 1), 24 + 4 * (i - 1), GEN_WALK, true, true);
     world[LEVEL_COUNT - 1] = create_map(78, 22, GEN_WALK, true, false);
     init_player(map_win, stats_win, hp_win, area_win, examine_win, world[0]);
     int x, y;
-    get_random_empty_tile(&x, &y, world[0]);
-    spawn_actor(x, y, "data/test.actor", world[0]);
-    get_random_empty_tile(&x, &y, world[0]);
-    spawn_item(x, y, "data/test.item", world[0]);
-    spawn_item(x + 2, y + 2, "data/fertilizer.item", world[0]);
+    /* get_random_empty_tile(&x, &y, world[0]); */
+    /* spawn_actor(x, y, "data/test.actor", world[0]); */
     get_random_empty_tile(&x, &y, world[0]);
     player_set_position(x, y);
     draw_map(x, y, world[0]);

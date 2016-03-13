@@ -29,6 +29,8 @@ enum input_directions {
     DIRECTION_UP,
     DIRECTION_DOWN,
 
+    DIRECTION_TARGET,
+
     DIRECTION_COUNT
 };
 

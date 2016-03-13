@@ -25,7 +25,7 @@ char* create_path(const char* path)
     }
 #endif
 
-    char* new_path = calloc(strlen(buf) + strlen(path), sizeof(char));
+    char* new_path = calloc(strlen(buf) + strlen(path) + 1, sizeof(char));
     strcat(new_path, buf);
     strcat(new_path, path);
     free(buf);

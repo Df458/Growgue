@@ -7,7 +7,7 @@ static MEVENT mouse;
 
 void init_input()
 {
-    mousemask(BUTTON3_RELEASED | BUTTON3_CLICKED, 0);
+    mousemask(BUTTON3_RELEASED | BUTTON3_CLICKED | BUTTON1_CLICKED | BUTTON1_RELEASED, 0);
 }
 
 int get_input(WINDOW* win)
@@ -148,6 +148,9 @@ int get_input(WINDOW* win)
             if(getmouse(&mouse) == OK  && (mouse.bstate & BUTTON3_RELEASED || mouse.bstate & BUTTON3_CLICKED)) {
                 last_input_type = INPUT_ACTION;
                 last_input_action = ACTION_EXAMINE;
+            } else if(getmouse(&mouse) == OK  && (mouse.bstate & BUTTON1_RELEASED || mouse.bstate & BUTTON1_CLICKED)) {
+                last_input_type = INPUT_DIRECTIONAL;
+                last_input_direction = DIRECTION_TARGET;
             } else {
                 last_input_type = INPUT_INVALID;
             }

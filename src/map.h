@@ -3,8 +3,9 @@
 #ifdef PDCURSES
 #include <xcurses/curses.h>
 #else
-// #include <curses.h>
+#include <curses.h>
 #endif
+#include "biome.h"
 #include "tile.h"
 
 enum map_gen {
@@ -26,10 +27,17 @@ typedef struct map
 
     int us_x;
     int us_y;
+
+    biome** biomes;
+    int biome_count;
+    char** actor_table;
+    int actor_table_count;
+    int active_rarity;
 }
 map;
 
 void init_map(WINDOW* map);
+map* load_map(const char* file, int width, int height, bool has_up, bool has_down);
 map* create_map(int width, int height, int gen_type, bool has_up, bool has_down);
 void update_map(int delta, map* to_update);
 void destroy_map(map* to_destroy);
