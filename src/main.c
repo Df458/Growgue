@@ -55,8 +55,6 @@ void init_game()
     world[LEVEL_COUNT - 1] = create_map(78, 22, GEN_WALK, true, false);
     init_player(map_win, stats_win, hp_win, area_win, examine_win, world[0]);
     int x, y;
-    /* get_random_empty_tile(&x, &y, world[0]); */
-    /* spawn_actor(x, y, "data/test.actor", world[0]); */
     get_random_empty_tile(&x, &y, world[0]);
     player_set_position(x, y);
     draw_map(x, y, world[0]);

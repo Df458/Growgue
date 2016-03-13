@@ -94,6 +94,11 @@ map* load_map(const char* file, int width, int height, bool has_up, bool has_dow
                 free(a);
                 a = 0;
             }
+            if((a = xmlGetProp(node, (const xmlChar*)"active"))) {
+                m->active_rarity = atoi((char*)a);
+                free(a);
+                a = 0;
+            }
             for(xmlNodePtr pnode = node->children; pnode; pnode = pnode->next) {
                 if(pnode->type == XML_ELEMENT_NODE && !xmlStrcmp(pnode->name, (const xmlChar*)"actor")) {
                     if((a = xmlGetProp(pnode, (const xmlChar*)"id"))) {
@@ -356,6 +361,12 @@ void update_map(int delta, map* to_update)
                     kill_plant(to_update->tiles[i * to_update->width + j].plant_ref);
             }
         }
+    }
+    if(to_update->active_rarity && !(rand() % to_update->active_rarity) && to_update->actor_table_count) {
+        int nx, ny;
+        get_random_empty_tile(&nx, &ny, to_update);
+        int index = rand() % to_update->actor_table_count;
+        spawn_actor(nx, ny, to_update->actor_table[index], to_update);
     }
     draw_map(x, y, to_update);
 }
@@ -718,10 +729,16 @@ void get_random_empty_tile(int* x, int* y, map* cmap)
 {
     int cx, cy;
 
+    int i = 0;
     do {
         cx = rand() % (cmap->width - 2) + 1;
         cy = rand() % (cmap->height - 2) + 1;
-    } while(cmap->tiles[cy * cmap->width + cx].solid == true);
+        ++i;
+    } while(cmap->tiles[cy * cmap->width + cx].solid == true && i < 10000);
+    if(i >= 10000) {
+        cx = -1;
+        cy = -1;
+    }
     *x = cx;
     *y = cy;
 }
