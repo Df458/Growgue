@@ -70,7 +70,9 @@ void add_message(int color, const char* message)
             i = LOG_WIDTH;
         else
             offset = 1;
-        _add_message(color, strndup(message + len, i));
+        char* temp = malloc((i + 1) * sizeof(char));
+        strncpy(temp, message + len, i);
+        _add_message(color, temp);
         len += i + offset;
     }
     _add_message(color, strdup(message + len));

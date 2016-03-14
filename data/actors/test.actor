@@ -1,9 +1,9 @@
 <actor>
     <display color="selected" char="o" name="One-Eyed One-Horned Flying Purple People Eater"/>
-    <stats hp="25" str="5"/>
+    <stats hp="25" str="5" xp="50"/>
     <aggro radius="0"/>
-    <script id="data/test.lua"/>
+    <script id="data/scripts/test.lua"/>
     <drops>
-        <item id="data/fertilizer.item"/>
+        <item id="data/items/fertilizer.item" rarity="2" count="4"/>
     </drops>
 </actor>

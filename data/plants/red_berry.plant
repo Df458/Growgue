@@ -1,0 +1,8 @@
+<plant>
+    <display color="Growing Plant" char="236" name="Red Berry Bush"/>
+    <needs water="30"/>
+    <needs nutrients="25"/>
+    <needs minerals="100"/>
+    <stats time="1"/>
+    <harvest id="data/items/red_berry.item" count="2"/>
+</plant>

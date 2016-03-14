@@ -1,0 +1,5 @@
+<plant>
+    <display color="Growing Plant" char="232" name="Explomato Plant"/>
+    <stats time="3"/>
+    <script id="data/scripts/explotato.lua"/>
+</plant>

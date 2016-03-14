@@ -6,6 +6,8 @@
 #include "log.h"
 #include "luafunc.h"
 
+static bool won = false;
+
 bool callback(const char* name, lua_State* state)
 {
     lua_getglobal(state, name);
@@ -40,4 +42,15 @@ int lua_ask_question(lua_State* state)
         lua_pushboolean(state, 0);
     free(str);
     return 1;
+}
+
+int lua_finish(lua_State* state)
+{
+    won = true;
+    return 0;
+}
+
+bool game_won()
+{
+    return won;
 }

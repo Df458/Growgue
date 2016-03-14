@@ -1,9 +1,16 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/curses.h>
+#include <xcurses/panel.h>
 #else
-// #include <curses.h>
+#include <curses.h>
+#include <panel.h>
+#endif
+#else
+#include <curses.h>
+#include <panel.h>
 #endif
 #include "map.h"
 

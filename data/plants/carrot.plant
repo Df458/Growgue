@@ -1,0 +1,8 @@
+<plant>
+    <display color="Growing Carrot" char="39" name="Carrot Plant"/>
+    <needs water="10"/>
+    <needs nutrients="5"/>
+    <needs minerals="1"/>
+    <stats time="30"/>
+    <harvest id="data/items/carrot.item" count="1"/>
+</plant>

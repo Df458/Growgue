@@ -1,0 +1,7 @@
+<plant>
+    <display color="Growing Plant" char="244" name="Danger Vine"/>
+    <needs water="100"/>
+    <needs nutrients="-50"/>
+    <stats time="2"/>
+    <script id="data/scripts/danger_vine.lua"/>
+</plant>

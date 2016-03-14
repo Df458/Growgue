@@ -1,0 +1,12 @@
+<actor>
+    <display color="Brown Skin" char="h" name="Dwarf Warrior"/>
+    <stats hp="35" str="20" def="6" xp="40"/>
+    <drops>
+        <item id="data/items/fertilizer.item" rarity="10"/>
+        <item id="data/items/squash_seed.item" count="5" rarity="10"/>
+        <item id="data/items/red_berry.item" count="5" rarity="3"/>
+        <item id="data/items/longsword.item" count="1" rarity="7"/>
+        <item id="data/items/ironbody.item" count="1" rarity="7"/>
+        <item id="data/items/ironhelmet.item" count="1" rarity="7"/>
+    </drops>
+</actor>

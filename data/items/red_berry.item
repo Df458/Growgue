@@ -1,0 +1,5 @@
+<item>
+    <display color="Blood" char="." name="Red Berry"/>
+    <script id="data/scripts/red_berry.lua"/>
+    <plant id="data/plants/red_berry.plant"/>
+</item>

@@ -1,0 +1,4 @@
+<actor>
+    <display color="Brown Fur" char="s" name="Squirrel"/>
+    <stats hp="2" xp="1"/>
+</actor>

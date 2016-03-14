@@ -1,0 +1,5 @@
+<actor>
+    <display color="Lava" char="K" name="Kobold God"/>
+    <stats hp="80" str="50" def="8" xp="55"/>
+    <aggro radius="19"/>
+</actor>

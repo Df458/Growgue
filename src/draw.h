@@ -1,9 +1,16 @@
 #ifndef DRAW_H
 #define DRAW_H
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/curses.h>
+#include <xcurses/panel.h>
 #else
-// #include <curses.h>
+#include <curses.h>
+#include <panel.h>
+#endif
+#else
+#include <curses.h>
+#include <panel.h>
 #endif
 
 enum alignment

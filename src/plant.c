@@ -59,7 +59,10 @@ plant* create_plant(const char* file, int x, int y, map* ref)
                 a = 0;
             }
             if((a = xmlGetProp(node, (const xmlChar*)"char"))) {
-                pl->display = a[0];
+                if(strlen((char*)a) > 1)
+                    pl->display = atoi((char*)a);
+                else
+                    pl->display = a[0];
                 free(a);
                 a = 0;
             }
@@ -172,6 +175,8 @@ void insert_plant_into_lua(lua_State* state, plant* it)
 {
     lua_newtable(state);
     plant** i = lua_newuserdata(state, sizeof(plant*));
+    if(i == 0)
+        fprintf(stderr, "FATAL: FAILED TO ALLOCATE USERDATA\n");
     *i = it;
     lua_setfield(state, 1, "instance");
     luaL_setfuncs(state, plant_funcs, 0);

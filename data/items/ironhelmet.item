@@ -1,0 +1,4 @@
+<item>
+    <display color="Metal" char="239" name="Iron Helmet"/>
+    <stats slot="head" def="4"/>
+</item>

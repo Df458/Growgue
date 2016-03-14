@@ -1,0 +1,13 @@
+<map generator="walk">
+    <biome id="data/biomes/cave.biome"/>
+    <actors rarity="200" active="100">
+        <actor id="data/actors/test.actor"/>
+    </actors>
+    <plants rarity="60">
+        <plant id="data/plants/test.plant"/>
+    </plants>
+    <items rarity="100">
+        <item id="data/items/fertilizer.item" rarity="3"/>
+        <item id="data/items/fertilizer.item" count="1000"/>
+    </items>
+</map>

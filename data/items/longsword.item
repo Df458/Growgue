@@ -1,0 +1,4 @@
+<item>
+    <display color="Metal" char="/" name="Longsword"/>
+    <stats slot="weapon" str="8"/>
+</item>

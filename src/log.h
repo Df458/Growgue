@@ -1,9 +1,16 @@
 #ifndef LOG_H
 #define LOG_H
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/curses.h>
+#include <xcurses/panel.h>
 #else
 #include <curses.h>
+#include <panel.h>
+#endif
+#else
+#include <curses.h>
+#include <panel.h>
 #endif
 
 void init_log(WINDOW* log);

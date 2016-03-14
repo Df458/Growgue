@@ -1,0 +1,27 @@
+<map generator="walk">
+    <biome id="data/biomes/dirtcave.biome"/>
+    <actors rarity="200" active="100">
+        <actor id="data/actors/dwarf1.actor"/>
+        <actor id="data/actors/dwarf2.actor"/>
+        <actor id="data/actors/crab.actor"/>
+        <actor id="data/actors/plant.actor"/>
+        <actor id="data/actors/koboldlord.actor"/>
+        <actor id="data/actors/crab.actor"/>
+    </actors>
+    <plants rarity="150">
+        <plant id="data/plants/squash.plant"/>
+        <plant id="data/plants/snapper_vine.plant"/>
+        <plant id="data/plants/explotato.plant"/>
+        <plant id="data/plants/explomato.plant"/>
+        <plant id="data/plants/danger_vine.plant"/>
+        <plant id="data/plants/meat_tree.plant"/>
+    </plants>
+    <items rarity="100">
+        <item id="data/items/tricksterhelm.item"/>
+        <item id="data/items/supersix.item"/>
+        <item id="data/items/gildedbody.item"/>
+        <item id="data/items/gildedhelmet.item"/>
+        <item id="data/items/ironbody.item" rarity="3"/>
+        <item id="data/items/ironhelmet.item" rarity="3"/>
+    </items>
+</map>

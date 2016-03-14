@@ -1,0 +1,4 @@
+<item>
+    <display color="Blood" char="o" name="Meat"/>
+    <script id="data/scripts/meat.lua"/>
+</item>

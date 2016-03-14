@@ -1,0 +1,7 @@
+<plant>
+    <display color="Growing Plant" char="241" name="Snapper Vine"/>
+    <needs water="100"/>
+    <needs nutrients="-20"/>
+    <stats time="4"/>
+    <script id="data/scripts/snapper_vine.lua"/>
+</plant>

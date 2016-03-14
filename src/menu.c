@@ -1,8 +1,13 @@
 #define true TRUE
 #define false FALSE
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/curses.h>
 #include <xcurses/panel.h>
+#else
+#include <curses.h>
+#include <panel.h>
+#endif
 #else
 #include <curses.h>
 #include <panel.h>

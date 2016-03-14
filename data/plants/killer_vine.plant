@@ -1,0 +1,6 @@
+<plant>
+    <display color="Growing Plant" char="236" name="Killer Vine"/>
+    <needs nutrients="-100"/>
+    <stats time="2"/>
+    <script id="data/scripts/killer_vine.lua"/>
+</plant>

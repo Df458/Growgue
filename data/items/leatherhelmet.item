@@ -1,0 +1,4 @@
+<item>
+    <display color="Brown Skin" char="239" name="Leather Helmet"/>
+    <stats slot="head" def="2"/>
+</item>

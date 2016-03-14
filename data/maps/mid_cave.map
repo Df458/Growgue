@@ -1,0 +1,29 @@
+<map generator="farm">
+    <biome id="data/biomes/cave.biome"/>
+    <biome id="data/biomes/dirtcave.biome"/>
+    <actors rarity="200" active="50">
+        <actor id="data/actors/dwarf1.actor"/>
+        <actor id="data/actors/dwarf2.actor"/>
+        <actor id="data/actors/dwarf1.actor"/>
+        <actor id="data/actors/dwarf2.actor"/>
+        <actor id="data/actors/dwarf1.actor"/>
+        <actor id="data/actors/dwarf2.actor"/>
+        <actor id="data/actors/dwarf2.actor"/>
+        <actor id="data/actors/crab.actor"/>
+    </actors>
+    <plants rarity="100">
+        <plant id="data/plants/squash.plant"/>
+        <plant id="data/plants/snapper_vine.plant"/>
+        <plant id="data/plants/meat_tree.plant"/>
+    </plants>
+    <items rarity="50">
+        <item id="data/items/gildedbody.item"/>
+        <item id="data/items/gildedhelmet.item"/>
+        <item id="data/items/ironbody.item" rarity="20"/>
+        <item id="data/items/ironhelmet.item" rarity="20"/>
+        <item id="data/items/leatherbody.item" rarity="10"/>
+        <item id="data/items/leatherhelmet.item" rarity="10"/>
+        <item id="data/items/red_berry.item" rarity="30"/>
+        <item id="data/items/squash_seed.item" rarity="80"/>
+    </items>
+</map>

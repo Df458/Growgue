@@ -1,8 +1,13 @@
 #define true TRUE
 #define false FALSE
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/curses.h>
 #include <xcurses/panel.h>
+#else
+#include <curses.h>
+#include <panel.h>
+#endif
 #else
 #include <curses.h>
 #include <panel.h>
@@ -12,35 +17,39 @@
 #include "input.h"
 #include "reqs.h"
 
-static int help_length = 26;
+static int help_length = 30;
 static const char* help_text[] = 
 {
-    "Movement",
-    "y  k  u | 7  8  9",
-    " \\ | /  |  \\ | /",
-    "h-   -l | 4-   -6",
-    " / | \\  |  / | \\",
-    "b  j  n | 1  2  3",
+    "[Movement]",
+    "y  k  u",
+    " \\ | /",
+    "h-   -l",
+    " / | \\",
+    "b  j  n",
+    ">: Descend stairs [>]",
+    "<: Ascend stairs [<]",
     "",   
-    "Items",
+    "[Items]",
     ",: Pick up an item",
     "d: Drop an item",
     "a: Apply(Use) and item",
     "e: Equip an item",
     "r: Remove an item",
+    "i: View full inventory",
     "",
-    "Farming",
+    "[Farming]",
     "t: Till soil",
     "w: Water soil/plants",
     "p: Plant an item",
     "v: Harvest an item",
     "",
-    "Misc",
+    "[Misc]",
+    "Right-Click any tile: Examine a tile and view its contents",
     "[/]: Scroll backwards/forwards",
     "enter: Confirm/Select",
     "q: Quit/Close/Cancel",
     "y/n Yes/No",
-    "?: View this help page"
+    "?: View this help page",
 };
 
 void show_controls()

@@ -1,4 +1,7 @@
-include config.mk
+APPNAME=growgue
+BUILDTYPE=Debug
+OSTARGET=Linux
+CURSES=pdcurses
 
 # OS-specific config
 ifeq ($(OSTARGET), Linux)
@@ -23,6 +26,9 @@ SRCPATH=src
 # Flags
 CFLAGS=-Wall -Werror -Wno-unused-but-set-variable -D BUILD_TYPE=$(BUILDTYPE) -D PROJECT_NAME="$(APPNAME)" `$(PKGCONFIG) --cflags lua libxml-2.0`
 CLIBS=-l$(CURSES) `$(PKGCONFIG) --libs lua, libxml-2.0`
+ifeq ($(OSTARGET), Linux)
+	CFLAGS += -DLinux
+endif
 
 ifeq ($(CURSES), pdcurses)
 	CFLAGS += -D PDCURSES -DNCURSES_MOUSE_VERSION `$(PKGCONFIG) --cflags sdl` -I/usr/include/xcurses
@@ -63,7 +69,7 @@ $(OBJPATH)/%.o: $(SRCPATH)/%.c
 all: $(GAMETARGET)
 
 $(GAMETARGET): $(GAMEDEPS) $(GAMEOBJS)
-	gcc -o $(GAMETARGET) $(GAMEFLAGS) $(GAMEOBJS) $(CLIBS)
+	$(CC) -o $(GAMETARGET) $(GAMEFLAGS) $(GAMEOBJS) $(CLIBS)
 
 clean:
 	rm -rf $(OBJPATH)

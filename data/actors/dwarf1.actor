@@ -1,0 +1,10 @@
+<actor>
+    <display color="Brown Skin" char="h" name="Dwarf Farmer"/>
+    <stats hp="20" str="9" def="3" xp="20"/>
+    <drops>
+        <item id="data/items/potato.item" count="2"/>
+        <item id="data/items/fertilizer.item" rarity="3"/>
+        <item id="data/items/squash_seed.item" count="5" rarity="10"/>
+        <item id="data/items/red_berry.item" count="1" rarity="5"/>
+    </drops>
+</actor>

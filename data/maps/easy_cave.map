@@ -1,0 +1,20 @@
+<map generator="walk">
+    <biome id="data/biomes/cave.biome"/>
+    <actors rarity="200" active="100">
+        <actor id="data/actors/kobold.actor"/>
+        <actor id="data/actors/dwarf1.actor"/>
+    </actors>
+    <plants rarity="150">
+        <plant id="data/plants/squash.plant"/>
+        <plant id="data/plants/snapper_vine.plant"/>
+    </plants>
+    <items rarity="100">
+        <item id="data/items/fertilizer.item" rarity="200"/>
+        <item id="data/items/shortsword.item" rarity="20"/>
+        <item id="data/items/longsword.item"/>
+        <item id="data/items/leatherbody.item" rarity="20"/>
+        <item id="data/items/ironbody.item"/>
+        <item id="data/items/leatherhelmet.item" rarity="20"/>
+        <item id="data/items/ironhelmet.item"/>
+    </items>
+</map>

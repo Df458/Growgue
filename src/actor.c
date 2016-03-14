@@ -35,7 +35,14 @@ actor* create_actor(const char* file)
     act->hp = 0;
     act->str = 0;
     act->def = 0;
+    act->xp = 0;
     act->name = strdup("Creature");
+    act->drops = 0;
+    act->drop_rarities = 0;
+    act->drop_counts = 0;
+    act->drop_count = 0;
+    act->aggro = 0;
+    act->angry = false;
 
     xmlChar* a = 0;
     for(xmlNodePtr node = root->children; node; node = node->next) {
@@ -46,7 +53,10 @@ actor* create_actor(const char* file)
                 a = 0;
             }
             if((a = xmlGetProp(node, (const xmlChar*)"char"))) {
-                act->display = a[0];
+                if(strlen((char*)a) > 1)
+                    act->display = atoi((char*)a);
+                else
+                    act->display = a[0];
                 free(a);
                 a = 0;
             }
@@ -70,6 +80,11 @@ actor* create_actor(const char* file)
             }
             if((a = xmlGetProp(node, (const xmlChar*)"def"))) {
                 act->def = atoi((char*)a);
+                free(a);
+                a = 0;
+            }
+            if((a = xmlGetProp(node, (const xmlChar*)"xp"))) {
+                act->xp = atoi((char*)a);
                 free(a);
                 a = 0;
             }
@@ -97,6 +112,35 @@ actor* create_actor(const char* file)
                 a = 0;
             }
         }
+        if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"drops")) {
+            for(xmlNodePtr pnode = node->children; pnode; pnode = pnode->next) {
+                if(pnode->type == XML_ELEMENT_NODE && !xmlStrcmp(pnode->name, (const xmlChar*)"item")) {
+                    if((a = xmlGetProp(pnode, (const xmlChar*)"id"))) {
+                        char* path = strdup((char*)a);
+                        act->drop_count++;
+                        act->drops = realloc(act->drops, act->drop_count * sizeof(char*));
+                        act->drop_counts = realloc(act->drop_counts, act->drop_count * sizeof(char*));
+                        act->drop_rarities = realloc(act->drop_rarities, act->drop_count * sizeof(char*));
+                        act->drops[act->drop_count - 1] = path;
+                        act->drop_counts[act->drop_count - 1] = 1;
+                        act->drop_rarities[act->drop_count - 1] = 1;
+                        free(a);
+                        a = 0;
+                    } else
+                        continue;
+                    if((a = xmlGetProp(pnode, (const xmlChar*)"rarity"))) {
+                        act->drop_rarities[act->drop_count - 1] = atoi((char*)a);
+                        free(a);
+                        a = 0;
+                    }
+                    if((a = xmlGetProp(pnode, (const xmlChar*)"count"))) {
+                        act->drop_counts[act->drop_count - 1] = atoi((char*)a);
+                        free(a);
+                        a = 0;
+                    }
+                }
+            }
+        }
     }
     xmlFreeDoc(doc);
 
@@ -122,42 +166,30 @@ void init_actor(actor* act)
 
 void update_actor(actor* act, struct map* cmap)
 {
+    callback("update", act->script_state);
     int x, y, dx, dy;
     player_get_position(&x, &y);
     dx = abs(act->x - x);
     dy = abs(act->y - y);
-    if(dx <= act->aggro && dy <= act->aggro) {
+    if((dx <= act->aggro && dy <= act->aggro) || act->angry) {
         if(step_towards_player(act, cmap)) {
         } else {
             if(dx <= 1 && dy <= 1) {
                 int dmg = damage_player(act->str);
-                /* char* damage_text = 0; */
                 if(dmg > 0) {
-                    /* int len = snprintf(0, 0, "The %s hits you for %d damage", act->name, dmg); */
-                    /* damage_text = calloc(len + 1, sizeof(char)); */
-                    /* snprintf(damage_text, len + 1, "The %s hits you for %d damage", act->name, dmg); */
                     printf_message(COLOR_DEFAULT, "The %s hits you for %d damage", act->name, dmg);
                 } else {
-                    /* int len = snprintf(0, 0, "The %s misses you", act->name); */
-                    /* damage_text = calloc(len + 1, sizeof(char)); */
-                    /* snprintf(damage_text, len + 1, "The %s misses you", act->name); */
-                    /* snprintf(damage_text, len + 1, "The %s misses you", act->name); */
                     printf_message(COLOR_DEFAULT, "The %s misses you", act->name);
                 }
-                /* add_message(COLOR_DEFAULT, damage_text); */
-                /* free(damage_text); */
-                lua_getglobal(act->script_state, "attack");
-                if(!lua_isfunction(act->script_state, -1)) {
-                    lua_pop(act->script_state, 1);
-                } else {
-                    if(lua_pcall(act->script_state, 0, 0, 0)) {
-                        const char* err = lua_tostring(act->script_state, -1);
-                        add_message(COLOR_WARNING, err);
-                        lua_pop(act->script_state, 1);
-                    }
-                }
+                callback("attack", act->script_state);
             }
         }
+    } else {
+        step(act, act->x + (rand() % 3 - 1), act->y + (rand() % 3 - 1), cmap);
+    }
+    if(act->hp <= 0) {
+        act->to_kill = true;
+        add_xp(act->xp);
     }
 }
 
@@ -176,6 +208,13 @@ void kill_actor(actor* act, bool force)
         }
     }
     lua_close(act->script_state);
+    if(act->drop_count) {
+        for(int i = 0; i < act->drop_count; ++i)
+            free(act->drops[i]);
+        free(act->drops);
+        free(act->drop_rarities);
+        free(act->drop_counts);
+    }
     free(act->name);
     free(act);
 }
@@ -189,7 +228,28 @@ int lua_kill_actor(lua_State* state)
 int damage_actor(actor* act, int damage)
 {
     act->hp -= damage - act->def;
+    if(!act->angry) {
+        act->angry = true;
+        if(act->aggro == 0) {
+            printf_message(COLOR_WARNING, "The %s gets angry!", act->name);
+        }
+    }
+    if(act->hp <= 0)
+        act->to_kill = true;
     return damage - act->def;
+}
+
+void drop_loot(actor* act, map* cmap)
+{
+    for(int i = 0; i < act->drop_count; ++i) {
+        if(!(rand() % act->drop_rarities[i])) {
+            item* it = create_item(act->drops[i]);
+            if(!it)
+                continue;
+            it->count = act->drop_counts[i];
+            place_item(act->x, act->y, it, cmap);
+        }
+    }
 }
 
 void insert_actor_into_lua(lua_State* state, actor* it)

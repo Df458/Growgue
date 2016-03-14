@@ -1,0 +1,4 @@
+<item>
+    <display color="Red Skin" char="o" name="Explomato"/>
+    <plant id="data/plants/explomato.plant"/>
+</item>

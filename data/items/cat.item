@@ -1,0 +1,4 @@
+<item>
+    <display color="Carrot" char="c" name="Cuddles the Cat"/>
+    <script id="data/scripts/cat.lua"/>
+</item>

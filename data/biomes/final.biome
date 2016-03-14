@@ -1,0 +1,7 @@
+<biome>
+    <tiles>
+        <wall color="Lava" char="197"/>
+        <wall color="Lava" char="206"/>
+        <floor color="default" char="176"/>
+    </tiles>
+</biome>

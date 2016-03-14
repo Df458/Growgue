@@ -1,0 +1,10 @@
+<biome>
+    <tiles>
+        <floor color="default" char="."/>
+        <wall color="default" char="219"/>
+        <wall color="default" char="178"/>
+    </tiles>
+    <water min="0" max="0"/>
+    <nutrients min="0" max="0"/>
+    <minerals min="60" max="100"/>
+</biome>

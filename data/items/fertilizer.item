@@ -1,4 +1,4 @@
 <item>
     <display color="selected" char="+" name="Fertilizer"/>
-    <script id="data/fertilizer.lua"/>
+    <script id="data/scripts/fertilizer.lua"/>
 </item>

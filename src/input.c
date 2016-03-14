@@ -15,9 +15,9 @@ int get_input(WINDOW* win)
     last_input_type = INPUT_INVALID;
 
     int res;
-    if(win)
+    if(win) {
         res = wgetch(win);
-    else
+    } else
         res = getch();
     switch(res) {
         { // DIRECTION INPUTS
@@ -138,6 +138,10 @@ int get_input(WINDOW* win)
             break;
         case 'v':
             last_input_action = ACTION_HARVEST;
+            last_input_type = INPUT_ACTION;
+            break;
+        case 'i':
+            last_input_action = ACTION_INVENTORY;
             last_input_type = INPUT_ACTION;
             break;
         case '?':

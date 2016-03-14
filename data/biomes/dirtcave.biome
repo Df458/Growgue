@@ -1,0 +1,9 @@
+<biome>
+    <tiles>
+        <wall color="Soil" char="219"/>
+        <wall color="Soil" char="177"/>
+    </tiles>
+    <water min="30" max="60"/>
+    <nutrients min="75" max="80"/>
+    <minerals min="10" max="30"/>
+</biome>

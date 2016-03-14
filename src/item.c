@@ -1,7 +1,11 @@
 #define true TRUE
 #define false FALSE
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/panel.h>
+#else
+#include <panel.h>
+#endif
 #else
 #include <panel.h>
 #endif
@@ -92,7 +96,10 @@ item* create_item(const char* file)
                 a = 0;
             }
             if((a = xmlGetProp(node, (const xmlChar*)"char"))) {
-                it->display = a[0];
+                if(strlen((char*)a) > 1)
+                    it->display = atoi((char*)a);
+                else
+                    it->display = a[0];
                 free(a);
                 a = 0;
             }
@@ -213,8 +220,12 @@ item* get_item(item** item_list, int item_count, int purpose, bool auto_select)
     int selected = 0;
     while(should_continue) {
         set_color(inv_win, COLOR_DEFAULT);
+        wclear(inv_win);
         wborder(inv_win, 179, 179, 196, 196, 218, 191, 192, 217);
-        mvwaddstr(inv_win, 0, 1, purpose_list[purpose]);
+        if(purpose == PURPOSE_NONE)
+            mvwaddstr(inv_win, 0, 1, "Inventory");
+        else
+            mvwaddstr(inv_win, 0, 1, purpose_list[purpose]);
         for(int i = 0; i < temp_used; ++i) {
             set_color(inv_win, COLOR_DEFAULT);
             if(i == selected)

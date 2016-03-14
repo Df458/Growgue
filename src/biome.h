@@ -4,10 +4,10 @@
 
 typedef struct biome
 {
-    int floor_char;
-    int floor_color;
-    int wall_char;
-    int wall_color;
+    int* floor_chars;
+    int floor_count;
+    int* wall_chars;
+    int wall_count;
 
     float water_min;
     float water_max;

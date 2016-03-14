@@ -1,0 +1,8 @@
+<actor>
+    <display color="Pink Skin" char="p" name="Pig"/>
+    <stats hp="6" str="4" xp="5"/>
+    <script id="data/scripts/pig.lua"/>
+    <drops>
+        <item id="data/items/meat.item" count="1"/>
+    </drops>
+</actor>

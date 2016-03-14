@@ -1,0 +1,5 @@
+<actor>
+    <display color="EP Good" char="128" name="GREATER GIANT CAVE CRAB OF LEGEND"/>
+    <stats hp="1000" str="30" def="9" xp="999"/>
+    <aggro radius="100"/>
+</actor>

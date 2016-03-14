@@ -1,0 +1,8 @@
+<plant>
+    <display color="Growing Plant" char="241" name="Squash Plant"/>
+    <needs water="10"/>
+    <needs nutrients="50"/>
+    <needs minerals="-5"/>
+    <stats time="50"/>
+    <harvest id="data/items/squash.item" count="3"/>
+</plant>

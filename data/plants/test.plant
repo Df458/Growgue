@@ -2,6 +2,6 @@
     <display color="default" char="n" name="Onion"/>
     <needs water="100"/>
     <stats time="10"/>
-    <harvest id="data/test.item" count="2"/>
-    <script id="data/onionplant.lua"/>
+    <harvest id="data/items/test.item" count="2"/>
+    <script id="data/scripts/onionplant.lua"/>
 </plant>

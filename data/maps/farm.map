@@ -1,0 +1,18 @@
+<map generator="farm">
+    <biome id="data/biomes/farm.biome"/>
+    <actors rarity="200" active="100">
+        <actor id="data/actors/sheep.actor"/>
+        <actor id="data/actors/pig.actor"/>
+        <actor id="data/actors/squirrel.actor"/>
+    </actors>
+    <plants rarity="20">
+        <plant id="data/plants/potato.plant"/>
+        <plant id="data/plants/carrot.plant"/>
+    </plants>
+    <items rarity="100">
+        <item id="data/items/fertilizer.item" rarity="5"/>
+        <item id="data/items/potato.item" rarity="5"/>
+        <item id="data/items/carrot.item" rarity="5"/>
+        <item id="data/items/old_branch.item"/>
+    </items>
+</map>

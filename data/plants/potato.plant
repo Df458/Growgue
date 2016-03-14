@@ -1,0 +1,8 @@
+<plant>
+    <display color="Growing Plant" char="232" name="Potato Plant"/>
+    <needs water="20"/>
+    <needs nutrients="25"/>
+    <needs minerals="25"/>
+    <stats time="100"/>
+    <harvest id="data/items/potato.item" count="5"/>
+</plant>

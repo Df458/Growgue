@@ -1,0 +1,12 @@
+<biome>
+    <tiles>
+        <floor color="Plant" char="."/>
+        <floor color="Plant" char=","/>
+        <wall color="Plant" char="t"/>
+        <wall color="Soil" char="t"/>
+        <wall color="Plant" char="145"/>
+    </tiles>
+    <water min="70" max="100"/>
+    <nutrients min="60" max="90"/>
+    <minerals min="40" max="80"/>
+</biome>

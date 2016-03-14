@@ -1,0 +1,10 @@
+<actor>
+    <display color="White Fur" char="236" name="Sheep"/>
+    <stats hp="13" str="5" def="1" xp="10"/>
+    <script id="data/scripts/sheep.lua"/>
+    <drops>
+        <item id="data/items/meat.item" count="1"/>
+        <item id="data/items/meat.item" count="1" rarity="2"/>
+        <item id="data/items/meat.item" count="1" rarity="2"/>
+    </drops>
+</actor>

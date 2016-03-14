@@ -1,0 +1,23 @@
+<actor>
+    <display color="Growing Plant" char="236" name="Walking Plant"/>
+    <stats hp="37" str="30" def="9" xp="35"/>
+    <aggro radius="100"/>
+    <drops>
+        <item id="data/items/potato.item" count="2"/>
+        <item id="data/items/squash_seed.item" rarity="2"/>
+        <item id="data/items/red_berry.item" count="1" rarity="2"/>
+        <item id="data/items/carrot.item" count="1" rarity="2"/>
+        <item id="data/items/potato.item" count="2"/>
+        <item id="data/items/squash_seed.item" rarity="2"/>
+        <item id="data/items/red_berry.item" count="1" rarity="2"/>
+        <item id="data/items/carrot.item" count="1" rarity="2"/>
+        <item id="data/items/potato.item" count="2"/>
+        <item id="data/items/squash_seed.item" rarity="2"/>
+        <item id="data/items/red_berry.item" count="1" rarity="2"/>
+        <item id="data/items/carrot.item" count="1" rarity="2"/>
+        <item id="data/items/potato.item" count="2"/>
+        <item id="data/items/squash_seed.item" rarity="2"/>
+        <item id="data/items/red_berry.item" count="1" rarity="2"/>
+        <item id="data/items/carrot.item" count="1" rarity="2"/>
+    </drops>
+</actor>

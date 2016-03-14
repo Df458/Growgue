@@ -1,0 +1,4 @@
+<item>
+    <display color="Carrot" char="+" name="Squash Seed Packet"/>
+    <plant id="data/plants/squash.plant"/>
+</item>

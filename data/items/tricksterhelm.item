@@ -1,0 +1,5 @@
+<item>
+    <display color="Blood" char="239" name="Trickster's Crown"/>
+    <stats slot="head" def="3"/>
+    <script id="data/scripts/trickster.lua"/>
+</item>

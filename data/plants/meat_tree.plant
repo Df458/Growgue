@@ -1,0 +1,8 @@
+<plant>
+    <display color="Growing Plant" char="244" name="Meat Tree"/>
+    <needs water="100"/>
+    <needs nutrients="100"/>
+    <needs minerals="30"/>
+    <stats time="60"/>
+    <harvest id="data/items/meat.item" count="5"/>
+</plant>

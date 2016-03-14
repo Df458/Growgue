@@ -25,7 +25,7 @@ static int str = 0;
 static int def = 0;
 
 static int xp = 0;
-static int next = 25;
+static int next = 15;
 static int level = 1;
 
 static item* equipment[3] = { 0 };
@@ -47,11 +47,14 @@ const char* slot_names[SLOT_COUNT] = { "Head", "Body", "Hands" };
 
 void init_stats()
 {
-    hp_max = 100;
+    hp_max = 50;
     ep_max = 100;
 
     hp_current = hp_max;
     ep_current = ep_max;
+
+    str = 5;
+    def = 0;
 
     xp = 0;
     next = 25;
@@ -129,10 +132,35 @@ void draw_player(int py, int px)
     mvwaddch(map_win, py, px, '@');
     pres_x = px;
     pres_y = py;
-    mvwprintw(map_win, 23, 2, "LEVEL: %d", level);
-    mvwprintw(map_win, 23, 12, "DLEVEL: %02d", z);
+    mvwprintw(map_win, 23, 2, "LEVEL: %02d", level);
+    mvwprintw(map_win, 23, 13, "FLOOR: %02d", z + 1);
 
+    wclear(examine_win);
     wborder(examine_win, ' ', 179, ' ', 205, ' ', 179, 205, 181);
+    if(equipment[0]) {
+        mvwprintw(examine_win, 6, 0, "Head:");
+        mvwprintw(examine_win, 7, 0, "%.9s", equipment[0]->name);
+        mvwprintw(examine_win, 8, 0, "+%d +%d", equipment[0]->str, equipment[0]->def);
+    } else {
+        mvwprintw(examine_win, 6, 0, "Head:");
+        mvwprintw(examine_win, 7, 0, "None");
+    }
+    if(equipment[1]) {
+        mvwprintw(examine_win, 3, 0, "Body:");
+        mvwprintw(examine_win, 4, 0, "%.9s", equipment[1]->name);
+        mvwprintw(examine_win, 5, 0, "+%d +%d", equipment[1]->str, equipment[1]->def);
+    } else {
+        mvwprintw(examine_win, 3, 0, "Body:");
+        mvwprintw(examine_win, 4, 0, "None");
+    }
+    if(equipment[2]) {
+        mvwprintw(examine_win, 0, 0, "Weapon:");
+        mvwprintw(examine_win, 1, 0, "%.9s", equipment[2]->name);
+        mvwprintw(examine_win, 2, 0, "+%d +%d", equipment[2]->str, equipment[2]->def);
+    } else {
+        mvwprintw(examine_win, 0, 0, "Weapon:");
+        mvwprintw(examine_win, 1, 0, "None");
+    }
     wborder(area_win, ' ', 179, 196, 205, 196, 191, 205, 181);
 
     wrefresh(map_win);
@@ -152,6 +180,12 @@ void update_player()
             player_act();
             break;
     }
+    if(hp_current < hp_max)
+        hp_current++;
+    if(hp_current > hp_max)
+        hp_current = hp_max;
+    if(ep_current > ep_max)
+        ep_current = ep_max;
 }
 
 void cleanup_player()
@@ -246,7 +280,11 @@ void player_move(int direction)
             damage_text = calloc(len + 1, sizeof(char));
             snprintf(damage_text, len + 1, "You miss the %s", act->name);
         }
-        add_message(COLOR_DEFAULT, damage_text);
+        if(act->hp <= 0) {
+            printf_message(COLOR_DEFAULT, "You kill the %s!", act->name);
+            add_xp(act->xp);
+        } else
+            add_message(COLOR_DEFAULT, damage_text);
         free(damage_text);
     }
 }
@@ -261,10 +299,10 @@ void player_act()
             item* it = get_item(items_at(x, y, current_map), item_count_at(x, y, current_map), PURPOSE_PICKUP, true);
             if(!it)
                 break;
-            take_item(x, y, it, current_map);
             printf_message(COLOR_DEFAULT, "Picked up %d %s", it->count, it->name);
-            add_item(it);
             callback("picked_up", it->script_state);
+            take_item(x, y, it, current_map);
+            add_item(it);
         } break;
         case ACTION_DROP: {
             item* it = get_item(inventory, item_count, PURPOSE_DROP, false);
@@ -276,8 +314,8 @@ void player_act()
                 callback("removed", it->script_state);
             }
             item* clone = clone_item(it);
-            place_item(x, y, clone, current_map);
             callback("dropped", clone->script_state);
+            place_item(x, y, clone, current_map);
             remove_item(it, -1);
         } break;
         case ACTION_APPLY: {
@@ -288,7 +326,7 @@ void player_act()
             remove_item(it, 1);
         } break;
         case ACTION_EQUIP: {
-            item* it = get_item(inventory, 3, PURPOSE_EQUIP, false);
+            item* it = get_item(inventory, item_count, PURPOSE_EQUIP, false);
             if(!it || it->slot == SLOT_INVALID)
                 break;
             callback("equip", it->script_state);
@@ -320,6 +358,9 @@ void player_act()
         case ACTION_HELP:
             show_controls();
             break;
+        case ACTION_INVENTORY:
+            get_item(inventory, item_count, PURPOSE_NONE, false);
+            break;
         case ACTION_WATER:
             water_tile(x, y, current_map);
             break;
@@ -341,8 +382,10 @@ int damage_player(int damage)
 {
     int adef = def;
     for(int i = 0; i < SLOT_COUNT; ++i)
-        if(equipment[i])
+        if(equipment[i]) {
             adef += equipment[i]->def;
+            callback("attacked", equipment[i]->script_state);
+        }
     hp_current -= damage - adef;
     return damage - adef;
 }
@@ -416,13 +459,16 @@ void add_xp(int new_xp)
 {
     xp += new_xp;
 
-    if(xp >= next) {
+    while(xp >= next) {
         level += 1;
-        next = 25 + (20 * level) + (5 * pow((level + 1) / 2, 2));
-        hp_max += 50;
+        xp -= next;
+        next = 15 + (20 * level) + (5 * pow((level + 1) / 2, 2));
+        hp_max += 25;
         ep_max += 50;
-        hp_current += 50;
+        hp_current += 25;
         ep_current += 50;
+        str += 2;
+        def += 1;
     }
 }
 
@@ -446,10 +492,20 @@ int lua_player_index(lua_State* state)
     return 1;
 }
 
+void update_hp(int hp)
+{
+    if(hp > hp_current) {
+        printf_message(COLOR_HP_GOOD, "You gain %d hp.", hp - hp_current);
+    } else if(hp < hp_current) {
+        printf_message(COLOR_HP_CRIT, "You lose %d hp.", hp_current - hp, hp_current, hp);
+    }
+    hp_current = hp;
+}
+
 int lua_player_newindex(lua_State* state)
 {
     const char* index = lua_tostring(state, 2);
-    if(!strcmp(index, "hp") && lua_isinteger(state, 3)) hp_current = lua_tointeger(state, 3);
+    if(!strcmp(index, "hp") && (lua_isinteger(state, 3) || lua_isnumber(state, 3))) { update_hp(lua_tointeger(state, 3)); }
     else if(!strcmp(index, "hp_max")) hp_max = lua_tointeger(state, 3);
     else if(!strcmp(index, "ep")) ep_current = lua_tointeger(state, 3);
     else if(!strcmp(index, "ep_max")) ep_max = lua_tointeger(state, 3);

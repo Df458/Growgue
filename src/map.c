@@ -20,6 +20,8 @@
 
 static const char* type_strs[] = {
     "walk",
+    "farm",
+    "final",
 };
 
 static WINDOW* map_win = 0;
@@ -172,7 +174,8 @@ map* load_map(const char* file, int width, int height, bool has_up, bool has_dow
     for(int i = 0; i < m->height; ++i) {
         for(int j = 0; j < m->width; ++j) {
             int b = rand() % m->biome_count;
-            apply_biome(&(m->tiles[i * m->width + j]), m->biomes[b]);
+            if((j != m->ds_x || i != m->ds_y) && (j != m->us_x || i != m->us_y))
+                apply_biome(&(m->tiles[i * m->width + j]), m->biomes[b]);
             if(m->tiles[i * m->width + j].can_till && !(rand() % plant_rarity) && plant_table_count) {
                 int index = rand() % plant_table_count;
                 spawn_plant(j, i, plant_table[index], m);
@@ -295,9 +298,31 @@ map* create_map(int width, int height, int gen_type, bool has_up, bool has_down)
                 }
             }
             } break;
+        case GEN_FARM : {
+            int tcount = width * height * 0.2;
+            for(int i = 1; i < new_map->height - 1; ++i) {
+                for(int j = 1; j < new_map->width - 1; ++j) {
+                    new_map->tiles[i * new_map->width + j].solid = false;
+                }
+            }
+            for(int i = 0; i < tcount; ++i) {
+                int tx = rand() % (width - 1) + 1;
+                int ty = rand() % (height - 1) + 1;
+                new_map->tiles[ty * new_map->width + tx].solid = true;
+            }
+        } break;
+        case GEN_FINAL : {
+            for(int i = 1; i < new_map->height - 1; ++i) {
+                for(int j = 1; j < new_map->width - 1; ++j) {
+                    new_map->tiles[i * new_map->width + j].solid = false;
+                }
+            }
+        } break;
     }
 
     int patch_count = rand() % 8 + 2;
+    if(gen_type == GEN_FINAL)
+        patch_count = 0;
     for(int i = 0; i < patch_count; ++i) {
         int cx, cy;
         get_random_empty_tile(&cx, &cy, new_map);
@@ -343,9 +368,11 @@ void update_map(int delta, map* to_update)
     for(int i = 0; i < to_update->actor_count; ++i) {
         if(!to_update->actors[i])
             continue;
-        update_actor(to_update->actors[i], to_update);
+        if(!to_update->actors[i]->to_kill)
+            update_actor(to_update->actors[i], to_update);
         if(to_update->actors[i]->to_kill) {
             to_update->tiles[to_update->actors[i]->y * to_update->width + to_update->actors[i]->x].actor_ref = 0;
+            drop_loot(to_update->actors[i], to_update);
             kill_actor(to_update->actors[i], false);
             to_update->actors[i] = 0;
         }
@@ -401,8 +428,8 @@ void draw_map(int x, int y, map* to_draw)
     wclear(map_win);
     set_color(map_win, COLOR_DEFAULT);
     wborder(map_win, 179, 186, 196, 205, 218, 210, 198, 202);
-    mvwaddch(map_win, 7, 79, 204);
-    mvwaddch(map_win, 15, 79, 204);
+    mvwaddch(map_win, 5, 79, 204);
+    mvwaddch(map_win, 13, 79, 204);
     mvwaddch(map_win, 23, 44, 209);
     mvwaddch(map_win, 23, 45, 209);
 
@@ -592,6 +619,18 @@ bool step_towards_player(actor* act, map* cmap)
     return false;
 }
 
+bool step(actor* act, int x, int y, map* cmap)
+{
+    if(can_move(x, y, cmap) == 1) {
+        cmap->tiles[act->y * cmap->width + act->x].actor_ref = 0;
+        act->x = x;
+        act->y = y;
+        cmap->tiles[act->y * cmap->width + act->x].actor_ref = act;
+        return true;
+    }
+    return false;
+}
+
 actor* get_actor_at(int x, int y, map* cmap)
 {
     return cmap->tiles[y * cmap->width + x].actor_ref;
@@ -632,6 +671,11 @@ void place_item(int x, int y, item* it, map* cmap)
     for(i = 0; i < t->item_count; ++i) {
         if(t->item_list[i] == 0)
             break;
+        if(!strcmp(t->item_list[i]->orig_path, it->orig_path)) {
+            t->item_list[i]->count += it->count;
+            destroy_item(it);
+            return;
+        }
     }
     if(i == t->item_count) {
         t->item_count += 5;
@@ -790,7 +834,7 @@ void examine(int x, int y, map* cmap)
     }
     if(t->actor_ref) {
         printf_message(COLOR_DEFAULT, "There is a %s here", t->actor_ref->name);
-        printf_message(COLOR_DEFAULT, "[HP: %d] [STR: %d] [DEF: %d] %s", t->actor_ref->hp, t->actor_ref->str, t->actor_ref->def, t->actor_ref->aggro ? "Hostile" : "Peaceful");
+        printf_message(COLOR_DEFAULT, "[HP: %d] [STR: %d] [DEF: %d] %s", t->actor_ref->hp, t->actor_ref->str, t->actor_ref->def, (t->actor_ref->aggro || t->actor_ref->angry) ? "Hostile" : "Peaceful");
     }
     printf_message(COLOR_DEFAULT, "[Water: %%%d] [Nutrients: %%%d] [Minerals: %%%d]", (int)t->water, (int)t->nutrients, (int)t->minerals);
 }

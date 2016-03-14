@@ -1,0 +1,5 @@
+<item>
+    <display color="selected" char="/" name="Trickster's Staff"/>
+    <stats slot="weapon" str="15"/>
+    <script id="data/scripts/tstaff.lua"/>
+</item>

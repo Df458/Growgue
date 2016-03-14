@@ -1,7 +1,11 @@
 #define true TRUE
 #define false FALSE
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/curses.h>
+#else
+#include <curses.h>
+#endif
 #else
 #include <curses.h>
 #endif
@@ -15,6 +19,7 @@
 #include "item.h"
 #include "input.h"
 #include "log.h"
+#include "luafunc.h"
 #include "macro.h"
 #include "map.h"
 #include "menu.h"
@@ -37,9 +42,9 @@ static int current_level = 0;
 void init_game()
 {
     WINDOW* map_win = newwin(24, 80, 0, 0);
-    WINDOW* area_win = newwin(8, 10, 0, 80);
-    WINDOW* stats_win = newwin(8, 10, 8, 80);
-    WINDOW* examine_win = newwin(8, 10, 16, 80);
+    WINDOW* area_win = newwin(6, 10, 0, 80);
+    WINDOW* stats_win = newwin(8, 10, 6, 80);
+    WINDOW* examine_win = newwin(10, 10, 14, 80);
     WINDOW* hp_win = newwin(1, 90, 24, 0);
     WINDOW* log_win = newwin(10, 90, 25, 0);
 
@@ -49,15 +54,31 @@ void init_game()
     init_map(map_win);
     init_items();
     world = calloc(LEVEL_COUNT, sizeof(map*));
-    world[0] = load_map("data/test.map", 78, 22, false, true);
-    for(int i = 1; i < LEVEL_COUNT - 1; ++i)
-        world[i] = create_map(80 + 10 * (i - 1), 24 + 4 * (i - 1), GEN_WALK, true, true);
-    world[LEVEL_COUNT - 1] = create_map(78, 22, GEN_WALK, true, false);
+    world[0] = load_map("data/maps/farm.map", 78, 22, false, true);
+    for(int i = 1; i < 3; ++i)
+        world[i] = load_map("data/maps/easy_cave.map", 80 + 10 * (i - 1), 24 + 4 * (i - 1), true, true);
+    for(int i = 3; i < 5; ++i)
+        world[i] = load_map("data/maps/mid_cave.map", 80 + 10 * (i - 1), 24 + 4 * (i - 1), true, true);
+    for(int i = 5; i < 7; ++i)
+        world[i] = load_map("data/maps/hard_cave.map", 80 + 15 * (i - 1), 24 + 6 * (i - 1), true, true);
+    for(int i =7; i < 9; ++i)
+        world[i] = load_map("data/maps/crazy_cave.map", 80 + 18 * (i - 1), 24 + 8 * (i - 1), true, true);
+    world[LEVEL_COUNT - 1] = load_map("data/maps/final.map", 78, 22, true, false);
     init_player(map_win, stats_win, hp_win, area_win, examine_win, world[0]);
     int x, y;
+    get_random_empty_tile(&x, &y, world[LEVEL_COUNT - 1]);
+    spawn_item(x, y, "data/items/cat.item", world[LEVEL_COUNT - 1]);
+
     get_random_empty_tile(&x, &y, world[0]);
     player_set_position(x, y);
     draw_map(x, y, world[0]);
+    add_message(COLOR_DEFAULT, "@ symbol, a brave young farmer, was out for a stroll on his farm when his cat Cuddles ran down into the gaping starcase to the deadly Caves of Consternation! @ symbol had been meaning to patch that up for a while, but hadn't gotten a chance yet. Don't judge.");
+    if(ask_question(COLOR_SELECTION, "Will you help @ symbol retrieve his cat, Cuddles?"))
+        add_message(COLOR_HP_GOOD, "Excellent! Get to it, then!");
+    else {
+        add_message(COLOR_HP_CRIT, "Well that was unexpected. Okay then, press q to quit to the main menu.");
+        dead = true;
+    }
     draw_log();
 }
 
@@ -70,18 +91,19 @@ bool update_game()
         log_scroll(get_last_action() == ACTION_SCROLL_UP);
         draw_log();
     } else if(!dead) {
+        update_player();
+        if(get_current_floor() != current_level) {
+            set_current_map(world[get_current_floor()], current_level < get_current_floor(), current_level > get_current_floor());
+            current_level = get_current_floor();
+        }
+        update_map(1, world[current_level]);
         if(is_dead()) {
             add_message(COLOR_HP_CRIT, "Oh dear, you've died!");
             add_message(COLOR_DEFAULT, "Press q to return to the main menu");
             dead = true;
-        } else {
-            update_player();
-            if(get_current_floor() != current_level) {
-                set_current_map(world[get_current_floor()], current_level < get_current_floor(), current_level > get_current_floor());
-                current_level = get_current_floor();
-            }
-            update_map(1, world[current_level]);
         }
+        if(game_won())
+            dead = true;
         draw_log();
     }
     return true;
@@ -122,10 +144,12 @@ int main(int argc, char* argv[])
 
     start_color();
 
+#ifdef Linux
     if(COLORS < MIN_COLS || COLOR_PAIRS < MIN_PAIRS) {
         endwin();
         fprintf(stderr, "Warning: Your terminal lacks sufficient color support to run this game (Expected %d colors and %d pairs, got %d colors and %d pairs).\n", MIN_COLS, MIN_PAIRS, COLORS, COLOR_PAIRS);
     }
+#endif
 
 #if !defined PDCURSES
     if(COLORS < BEST_COLS || COLOR_PAIRS < BEST_PAIRS) {
@@ -159,6 +183,7 @@ int main(int argc, char* argv[])
     init_input();
 
     bool should_continue = true;
+
 
     if(!init_menu())
     {

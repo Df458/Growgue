@@ -9,11 +9,6 @@ void draw_text_aligned(WINDOW* win, int row, const char* text, int align)
 
     // If we're out of bounds, or we don't have enough space, return
     if(row > rows || strlen(text) > cols) {
-#ifdef DEVEL
-        endwin();
-        fprintf(stderr, "Can't draw text, out of bounds: Length is %lu, Window width is %d\n", strlen(text), cols);
-        getch();
-#endif
         return;
     }
 

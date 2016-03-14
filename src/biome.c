@@ -21,10 +21,10 @@ biome* create_biome(const char* file)
         return 0;
     }
     biome* b = malloc(sizeof(biome));
-    b->floor_char = '.';
-    b->wall_char = '#';
-    b->floor_color = COLOR_DEFAULT;
-    b->wall_color = COLOR_DEFAULT;
+    b->floor_count = 0;
+    b->wall_count = 0;
+    b->floor_chars = 0;
+    b->wall_chars = 0;
     b->water_min = 0;
     b->water_max = 0;
     b->nutrients_min = 0;
@@ -34,28 +34,46 @@ biome* create_biome(const char* file)
 
     xmlChar* a = 0;
     for(xmlNodePtr node = root->children; node; node = node->next) {
-        if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"floor")) {
-            if((a = xmlGetProp(node, (const xmlChar*)"color"))) {
-                b->floor_color = color_str((char*)a);
-                free(a);
-                a = 0;
-            }
-            if((a = xmlGetProp(node, (const xmlChar*)"char"))) {
-                b->floor_char = a[0];
-                free(a);
-                a = 0;
-            }
-        }
-        if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"wall")) {
-            if((a = xmlGetProp(node, (const xmlChar*)"color"))) {
-                b->wall_color = color_str((char*)a);
-                free(a);
-                a = 0;
-            }
-            if((a = xmlGetProp(node, (const xmlChar*)"char"))) {
-                b->wall_char = a[0];
-                free(a);
-                a = 0;
+        if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"tiles")) {
+            for(xmlNodePtr pnode = node->children; pnode; pnode = pnode->next) {
+                if(pnode->type == XML_ELEMENT_NODE && !xmlStrcmp(pnode->name, (const xmlChar*)"floor")) {
+                    b->floor_chars = realloc(b->floor_chars, (b->floor_count + 1) * sizeof(int));
+                    b->floor_chars[b->floor_count * 2] = '.';
+                    b->floor_chars[b->floor_count * 2 + 1] = COLOR_DEFAULT;
+                    if((a = xmlGetProp(pnode, (const xmlChar*)"color"))) {
+                        b->floor_chars[b->floor_count * 2 + 1] = color_str((char*)a);
+                        free(a);
+                        a = 0;
+                    }
+                    if((a = xmlGetProp(pnode, (const xmlChar*)"char"))) {
+                        if(strlen((char*)a) > 1)
+                            b->floor_chars[b->floor_count * 2] = atoi((char*)a);
+                        else
+                            b->floor_chars[b->floor_count * 2] = a[0];
+                        free(a);
+                        a = 0;
+                    }
+                    b->floor_count++;
+                }
+                if(pnode->type == XML_ELEMENT_NODE && !xmlStrcmp(pnode->name, (const xmlChar*)"wall")) {
+                    b->wall_chars = realloc(b->wall_chars, (b->wall_count + 1) * sizeof(int));
+                    b->wall_chars[b->wall_count * 2] = '.';
+                    b->wall_chars[b->wall_count * 2 + 1] = COLOR_DEFAULT;
+                    if((a = xmlGetProp(pnode, (const xmlChar*)"color"))) {
+                        b->wall_chars[b->wall_count * 2 + 1] = color_str((char*)a);
+                        free(a);
+                        a = 0;
+                    }
+                    if((a = xmlGetProp(pnode, (const xmlChar*)"char"))) {
+                        if(strlen((char*)a) > 1)
+                            b->wall_chars[b->wall_count * 2] = atoi((char*)a);
+                        else
+                            b->wall_chars[b->wall_count * 2] = a[0];
+                        free(a);
+                        a = 0;
+                    }
+                    b->wall_count++;
+                }
             }
         }
         if(node->type == XML_ELEMENT_NODE && !xmlStrcmp(node->name, (const xmlChar*)"water")) {
@@ -97,11 +115,26 @@ biome* create_biome(const char* file)
     }
     xmlFreeDoc(doc);
 
+    if(b->floor_count == 0) {
+        b->floor_count = 1;
+        b->floor_chars = calloc(2, sizeof(int));
+        b->floor_chars[0] = '.';
+        b->floor_chars[1] = COLOR_DEFAULT;
+    }
+    if(b->wall_count == 0) {
+        b->wall_count = 1;
+        b->wall_chars = calloc(2, sizeof(int));
+        b->wall_chars[0] = '#';
+        b->wall_chars[1] = COLOR_DEFAULT;
+    }
+
     return b;
 }
 
 void destroy_biome(biome* b)
 {
+    free(b->floor_chars);
+    free(b->wall_chars);
     free(b);
 }
 
@@ -109,11 +142,13 @@ void apply_biome(tile* t, biome* b)
 {
     if(!t->can_till) {
         if(t->solid) {
-            t->display = b->wall_char;
-            t->color = b->wall_color;
+            int index = rand() % b->wall_count;
+            t->display = b->wall_chars[index * 2];
+            t->color = b->wall_chars[index * 2 + 1];
         } else {
-            t->display = b->floor_char;
-            t->color = b->floor_color;
+            int index = rand() % b->floor_count;
+            t->display = b->floor_chars[index * 2];
+            t->color = b->floor_chars[index * 2 + 1];
         }
     }
     if(b->water_min >= b->water_max)

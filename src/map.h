@@ -1,9 +1,16 @@
 #ifndef MAP_H
 #define MAP_H
 #ifdef PDCURSES
+#ifdef Linux
 #include <xcurses/curses.h>
+#include <xcurses/panel.h>
 #else
 #include <curses.h>
+#include <panel.h>
+#endif
+#else
+#include <curses.h>
+#include <panel.h>
 #endif
 #include "biome.h"
 #include "tile.h"
@@ -11,6 +18,8 @@
 enum map_gen {
     GEN_BLANK = -1,
     GEN_WALK,
+    GEN_FARM,
+    GEN_FINAL,
     GEN_TYPE_COUNT
 };
 
@@ -49,6 +58,7 @@ bool spawn_plant(int x, int y, const char* file, map* to_spawn);
 bool can_plant(int x, int y, map* cmap, bool explain);
 void set_weights(int x, int y, map* to_update);
 bool step_towards_player(actor* act, map* cmap);
+bool step(actor* act, int x, int y, map* cmap);
 actor* get_actor_at(int x, int y, map* cmap);
 void till(int x, int y, map* cmap);
 int get_cost(int x, int y, map* cmap);
